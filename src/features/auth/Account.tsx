@@ -2,7 +2,7 @@
 import { LogOut, Users } from 'lucide-react';
 import { openDialog, useApp, type SyncStatus } from '../../app/store';
 import { initials } from '../../lib/utils/text';
-import { Icon, avatarBg } from '../../components/shared';
+import { Avatar, Icon, avatarBg } from '../../components/shared';
 import { colorFor, logOut, switchWorkspace, useSession } from './session';
 
 export function WorkspacePicker() {
@@ -38,6 +38,20 @@ const STATUS_TEXT: Record<SyncStatus, string> = {
   saving: 'Saving…',
   offline: 'Offline, retrying',
 };
+
+/** Local mode's profile card: the demo "me", and where the data lives. */
+export function LocalProfile() {
+  const me = useApp((s) => s.team.find((m) => m.id === s.me));
+  return (
+    <div className="account">
+      <Avatar id={me?.id || ''} />
+      <div className="account-text">
+        <strong className="account-name">{me?.name || 'You'}</strong>
+        <span className="account-sync">Local mode · saved in this browser</span>
+      </div>
+    </div>
+  );
+}
 
 export function AccountBox() {
   const user = useSession((s) => s.user);

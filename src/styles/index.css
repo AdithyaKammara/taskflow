@@ -1,15 +1,15 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './views.css' layer(components);
+@import './dashboard.css' layer(components);
 
 /*
- * Tokens as Tailwind utilities: bg-surface, text-muted, border-border, rounded-md, font-heading…
- * Names that would equal a token's own name (--font-display, --shadow-pop) get a different utility
- * name, or the variable would point at itself.
+ * Tokens as Tailwind utilities: bg-surface, text-muted, border-border, rounded-md, text-accent-text…
+ * Names that would equal a token's own name (--shadow-pop) get a different utility name, or the
+ * variable would point at itself.
  */
 @theme inline {
   --font-sans: var(--font-ui);
-  --font-heading: var(--font-display);
 
   --color-bg: var(--bg);
   --color-sidebar: var(--sidebar);
@@ -26,6 +26,7 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
   --color-accent-contrast: var(--accent-contrast);
   --color-danger: var(--danger);
   --color-warn: var(--warn);
@@ -35,33 +36,36 @@
   --radius-md: var(--r-md);
   --radius-lg: var(--r-lg);
 
+  --shadow-card: var(--shadow-card);
   --shadow-float: var(--shadow-pop);
   --shadow-raised: var(--shadow-lift);
 
   --breakpoint-tablet: 56.25rem; /* 900px: the sidebar becomes a drawer below this */
 }
 
-/* Translucent chrome: sidebar, top bar, dialogs, palette, toasts. Never task rows, cards or forms. */
-@utility glass {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
-  border-color: var(--glass-border);
-}
-
-/* v6 sidebar nav and skip link (the other v6 controls come in with views.css) */
+/* App frame: sidebar navigation, skip link, dialogs */
 @layer components {
+  .nav-label-group {
+    padding: 14px 10px 6px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
   .nav-item {
-    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
     width: 100%;
-    min-height: 34px;
-    padding: 6px 10px;
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid transparent;
     border-radius: var(--r-sm);
     color: var(--text-2);
     font-weight: 500;
+    font-size: 0.92rem;
     text-decoration: none;
     transition:
       background-color var(--t-fast) var(--ease),
@@ -72,26 +76,20 @@
     color: var(--text);
   }
   .nav-item[aria-current='page'] {
-    background: var(--active);
+    background: var(--surface-2);
+    border-color: var(--border);
     color: var(--text);
-    font-weight: 650;
-  }
-  .nav-item[aria-current='page']::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 7px;
-    bottom: 7px;
-    width: 3px;
-    border-radius: 0 3px 3px 0;
-    background: var(--nav-accent, var(--accent));
+    font-weight: 600;
   }
   .nav-item svg {
     flex: none;
     color: var(--muted);
   }
   .nav-item[aria-current='page'] svg {
-    color: var(--nav-accent, var(--accent));
+    color: var(--accent-text);
+  }
+  button.nav-item {
+    text-align: left;
   }
 
   .skip-link {
@@ -107,11 +105,8 @@
   .skip-link:focus {
     top: 12px;
   }
-  button.nav-item {
-    text-align: left;
-  }
 
-  /* v7: dialogs (modals, palette, task drawer) are glass; the fields inside them stay solid */
+  /* dialogs (modals, palette, task drawer) are nearly solid glass; the fields inside stay solid */
   dialog {
     background: var(--glass-strong);
     border-color: var(--glass-border);
@@ -135,16 +130,14 @@
     font-size: 15px;
     line-height: 1.5;
     color: var(--text);
-    background: var(--wash), var(--bg);
-    background-attachment: fixed;
+    background: var(--bg);
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
   }
 
   button:not(:disabled) {
@@ -156,20 +149,13 @@
     outline-offset: 2px;
   }
 
-  .sidebar :focus-visible {
-    outline-color: var(--nav-accent);
-  }
-
   main:focus {
     outline: none;
   }
 
   @media (min-width: 1600px) {
     :root {
-      --sidebar-w: 272px;
-    }
-    body {
-      font-size: 16px;
+      --sidebar-w: 264px;
     }
   }
 
