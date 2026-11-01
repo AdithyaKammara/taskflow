@@ -1,0 +1,224 @@
+/*
+ * Design tokens: every colour, size and font the app uses.
+ * The values and names are carried over unchanged from v6 (css/tokens.css): cool slate neutrals, an ink
+ * accent, a dark slate sidebar in both themes, and status and priority colours as the only colour.
+ * New in v7: the display font, a soft background wash, and the glass surface tokens.
+ */
+
+@font-face {
+  font-family: 'Figtree';
+  src: url('fonts/figtree-latin-wght-normal.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('fonts/bricolage-grotesque-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* type */
+  --font-ui: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque', var(--font-ui);
+
+  /* surfaces */
+  --bg: #f6f7f9;
+  --sidebar: #111827;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --surface-3: #e3e7ed;
+  --hover: rgba(15, 23, 42, 0.05);
+  --active: rgba(15, 23, 42, 0.09);
+
+  /* text and lines */
+  --text: #0f172a;
+  --text-2: #334155;
+  --muted: #64748b;
+  --border: #e4e7ec;
+  --border-strong: #cdd3dc;
+
+  /* accent: ink, so it never competes with the status and priority colours */
+  --accent: #111827;
+  --accent-hover: #334155;
+  --accent-soft: #eceef2;
+  --accent-contrast: #ffffff;
+
+  --danger: #dc2626;
+  --warn: #a16207;
+
+  /* status: chart colour + tag background/text */
+  --st-todo: #94a3b8;
+  --st-todo-bg: #eef1f5;
+  --st-todo-fg: #475569;
+  --st-doing: #3b82f6;
+  --st-doing-bg: #e0ecfe;
+  --st-doing-fg: #1d4ed8;
+  --st-review: #d946ef;
+  --st-review-bg: #fbe8fe;
+  --st-review-fg: #86198f;
+  --st-done: #10b981;
+  --st-done-bg: #dcf5ea;
+  --st-done-fg: #047857;
+
+  /* priority tags */
+  --p-low: #047857;
+  --p-low-bg: #dcf5ea;
+  --p-medium: #92400e;
+  --p-medium-bg: #fdefc8;
+  --p-high: #b91c1c;
+  --p-high-bg: #fde2e2;
+
+  /* shape */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+
+  /* only things that float get a shadow; resting cards are separated by tone and border */
+  --shadow-pop: 0 16px 40px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06);
+  --shadow-lift: 0 4px 12px rgba(15, 23, 42, 0.1);
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 140ms;
+
+  /* density */
+  --row-pad: 10px;
+  --ctl-h: 36px;
+  --sidebar-w: 248px;
+
+  /* v7: a faint wash of two status hues, so glass has something to sit on */
+  --wash:
+    radial-gradient(1100px 520px at 100% -8%, rgba(59, 130, 246, 0.07), transparent 65%),
+    radial-gradient(900px 480px at -6% 104%, rgba(217, 70, 239, 0.05), transparent 65%);
+
+  /* v7: glass for chrome and overlays only, never for data surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  /* dialogs hold forms and sit over a dimmed page, so their glass is nearly solid */
+  --glass-strong: rgba(255, 255, 255, 0.96);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-edge: rgba(15, 23, 42, 0.06);
+  --glass-blur: 14px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0f1218;
+  --sidebar: #0a0d12;
+  --surface: #161a22;
+  --surface-2: #1d222c;
+  --surface-3: #2a303c;
+  --hover: rgba(255, 255, 255, 0.05);
+  --active: rgba(255, 255, 255, 0.09);
+
+  --text: #e6e9ef;
+  --text-2: #c3c9d4;
+  --muted: #8f98a8;
+  --border: #252b36;
+  --border-strong: #363d4a;
+
+  --accent: #f1f5f9;
+  --accent-hover: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --accent-contrast: #0f1218;
+
+  --danger: #f87171;
+  --warn: #fbbf24;
+
+  --st-todo: #7c8799;
+  --st-todo-bg: rgba(255, 255, 255, 0.08);
+  --st-todo-fg: #cbd2dc;
+  --st-doing: #60a5fa;
+  --st-doing-bg: rgba(96, 165, 250, 0.16);
+  --st-doing-fg: #93c5fd;
+  --st-review: #e879f9;
+  --st-review-bg: rgba(232, 121, 249, 0.16);
+  --st-review-fg: #f0abfc;
+  --st-done: #34d399;
+  --st-done-bg: rgba(52, 211, 153, 0.15);
+  --st-done-fg: #6ee7b7;
+
+  --p-low: #6ee7b7;
+  --p-low-bg: rgba(52, 211, 153, 0.15);
+  --p-medium: #fcd34d;
+  --p-medium-bg: rgba(251, 191, 36, 0.15);
+  --p-high: #fca5a5;
+  --p-high-bg: rgba(248, 113, 113, 0.17);
+
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 4px 14px rgba(0, 0, 0, 0.45);
+
+  --wash:
+    radial-gradient(1100px 520px at 100% -8%, rgba(96, 165, 250, 0.08), transparent 65%),
+    radial-gradient(900px 480px at -6% 104%, rgba(232, 121, 249, 0.05), transparent 65%);
+
+  --glass-bg: rgba(22, 26, 34, 0.7);
+  --glass-strong: rgba(22, 26, 34, 0.94);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-edge: rgba(0, 0, 0, 0.3);
+}
+
+/* the sidebar is always dark, so it re-maps the text and line tokens for its own children */
+.sidebar {
+  --text: #f1f5f9;
+  --text-2: #cbd5e1;
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --hover: rgba(255, 255, 255, 0.06);
+  --active: rgba(255, 255, 255, 0.1);
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --nav-accent: #ffffff;
+  --glass-bg: rgba(17, 24, 39, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] .sidebar {
+  --glass-bg: rgba(10, 13, 18, 0.82);
+}
+
+:root[data-density='compact'] {
+  --row-pad: 5px;
+  --ctl-h: 30px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --ctl-h: 44px;
+  }
+}
+
+/* no blur support, or the viewer asked for less transparency: glass becomes solid */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root,
+  :root[data-theme='dark'] {
+    --glass-bg: var(--surface);
+    --glass-strong: var(--surface);
+  }
+  .sidebar,
+  :root[data-theme='dark'] .sidebar {
+    --glass-bg: var(--sidebar);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root[data-theme='dark'] {
+    --glass-bg: var(--surface);
+    --glass-strong: var(--surface);
+    --wash: none;
+  }
+  .sidebar,
+  :root[data-theme='dark'] .sidebar {
+    --glass-bg: var(--sidebar);
+  }
+}

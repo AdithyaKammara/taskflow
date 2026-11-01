@@ -1,26 +1,51 @@
 {
   "name": "taskflow",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "private": true,
-  "description": "TaskFlow: a team task manager built with vanilla HTML, CSS and JavaScript (ES modules, no build step).",
+  "description": "TaskFlow: a team task manager built with React, Vite and TypeScript, with optional Supabase accounts and live team sync.",
   "type": "module",
   "scripts": {
-    "start": "node scripts/serve.mjs",
-    "test": "node --test",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc",
+    "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run format:check && npm test"
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build",
+    "e2e": "playwright test"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12"
   },
   "author": "Adithya Kammara",
   "license": "MIT",
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
-    "prettier": "^3.9.10"
+    "prettier": "^3.9.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3",
+    "lucide-react": "^1.66.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^8.5.1",
+    "zustand": "^5.0.16"
   }
 }

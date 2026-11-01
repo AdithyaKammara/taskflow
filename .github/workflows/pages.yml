@@ -23,10 +23,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Collect the static site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # the public Supabase URL and key come from .env, so this is a cloud-mode build
+      - run: npm run build
+      - name: Serve deep links (/taskflow/board, …) with the app
         run: |
-          mkdir dist
-          cp -r index.html css src dist/
+          cp dist/index.html dist/404.html
           if [ -d docs/screenshots ]; then mkdir -p dist/docs && cp -r docs/screenshots dist/docs/; fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

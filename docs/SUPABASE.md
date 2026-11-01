@@ -2,8 +2,8 @@
 
 TaskFlow runs in two modes:
 
-- **Local mode** (default): no accounts, data stays in the browser. This is what you get while
-  `src/backend/env.js` is empty.
+- **Local mode**: no accounts, data stays in the browser. This is what you get while the two
+  values in `.env` are empty (or overridden as empty in a git-ignored `.env.local`).
 - **Cloud mode**: email + password accounts, workspaces you invite teammates into, and live sync —
   when someone edits a task, everyone in the workspace sees it within a second.
 
@@ -17,15 +17,17 @@ The app stays a static site (GitHub Pages works); Supabase provides the database
    [`supabase/schema.sql`](../supabase/schema.sql) and press **Run**. It is safe to run again later.
 3. **Allow your site's address.** Go to **Authentication → URL Configuration**:
    - **Site URL**: `https://adithyakammara.github.io/taskflow/`
-   - **Redirect URLs**: add the same address, plus `http://localhost:5173/` for local development.
+   - **Redirect URLs**: add the same address, plus `http://localhost:5173/taskflow/` for local
+     development.
 
-   Confirmation and password-reset emails link back to these addresses.
+   Confirmation, password-reset and invite links always point at the app's base address (never a
+   page inside it), so these two entries are all it needs.
 4. **Connect the app.** In **Project Settings → API** copy the **Project URL** and the
-   **anon public** key into `src/backend/env.js`:
+   **publishable** (anon) key into `.env`:
 
-   ```js
-   export const SUPABASE_URL = 'https://xxxx.supabase.co';
-   export const SUPABASE_ANON_KEY = 'eyJ...';
+   ```bash
+   VITE_SUPABASE_URL=https://xxxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=sb_publishable_...
    ```
 
    The anon key is designed to be public; Row Level Security in `schema.sql` decides what each signed-in
@@ -35,13 +37,14 @@ The app stays a static site (GitHub Pages works); Supabase provides the database
 
 ## How it works
 
-| Piece                   | Where                                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| Tables, security, invite function | `supabase/schema.sql`                                      |
-| Client, accounts, workspaces, invites | `src/backend/cloud.js`                                 |
-| Live sync (send changes, apply teammates' changes) | `src/backend/sync.js`                     |
-| Sign-in screens, workspace switcher, Team dialog | `src/ui/account.js`, `css/account.css`      |
-| Row diffing (unit tested) | `src/model/diff.js`, `tests/diff.test.js`                          |
+| Piece                                              | Where                                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Tables, security, invite function                  | `supabase/schema.sql`                                                          |
+| Which mode the app runs in                         | `src/lib/supabase/env.ts`                                                      |
+| Client, accounts, workspaces, invites              | `src/lib/supabase/cloud.ts`                                                    |
+| Live sync (send changes, apply teammates' changes) | `src/lib/supabase/sync.ts`, tested in `tests/sync.test.ts`                     |
+| Session, sign-in screens, workspace switcher, Team | `src/features/auth/`                                                           |
+| Row diffing (unit tested)                          | `src/lib/model/diff.ts`, `tests/diff.test.ts`                                  |
 
 - **Workspaces.** Every new account gets its own workspace. Use the switcher at the top of the sidebar
   to move between workspaces or create another one.
