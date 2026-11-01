@@ -52,7 +52,7 @@ A team task manager with accounts, shared workspaces and live sync, built with R
 | Sync      | After each save, only the rows that changed are written. Teammates' changes arrive over Supabase Realtime. Failed writes retry; reconnects catch up.                      |
 | Database  | Supabase Postgres. Every table has Row Level Security, so people can only read and write workspaces they belong to.                                                       |
 | Auth      | Supabase Auth with email and password. Joining a workspace is only possible through a valid invite (`accept_invite()`).                                                   |
-| Hosting   | GitHub Pages, deployed by GitHub Actions on every push to `main`.                                                                                                         |
+| Hosting   | GitHub Pages at `/taskflow/`, deployed by GitHub Actions on every push to `main`. A Vercel project also builds every push (`vercel.json`), serving the app from `/`.      |
 
 A few choices worth knowing:
 
