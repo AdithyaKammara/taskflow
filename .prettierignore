@@ -4,3 +4,7 @@ dist
 docs
 package-lock.json
 _backup-v6
+.serena
+playwright-report
+test-results
+.e2e

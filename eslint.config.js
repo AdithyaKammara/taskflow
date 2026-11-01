@@ -1,31 +1,41 @@
 import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-export default [
-  { ignores: ['node_modules/', '_backup-v4/', '_backup-v6/', 'dist/', 'docs/'] },
+export default defineConfig([
+  {
+    ignores: [
+      'node_modules/',
+      '_backup-v4/',
+      '_backup-v6/',
+      'dist/',
+      'docs/',
+      'playwright-report/',
+      'test-results/',
+      '.e2e/',
+    ],
+  },
   js.configs.recommended,
   {
-    // Browser code
-    files: ['src/**/*.js'],
-    languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: 'module',
-      globals: { ...globals.browser },
-    },
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'e2e/**/*.ts', '*.config.ts'],
+    extends: [tseslint.configs.recommended],
+    languageOptions: { globals: { ...globals.browser } },
     rules: {
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'prefer-const': 'error',
       'no-var': 'error',
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
   {
-    // Node code: tests, tooling scripts and this config
-    files: ['tests/**/*.js', 'scripts/**/*.{js,mjs}', 'eslint.config.js'],
-    languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: 'module',
-      globals: { ...globals.node },
-    },
+    files: ['src/**/*.tsx'],
+    extends: [reactHooks.configs.flat.recommended],
   },
-];
+  {
+    // Node code: this config
+    files: ['eslint.config.js'],
+    languageOptions: { globals: { ...globals.node } },
+  },
+]);

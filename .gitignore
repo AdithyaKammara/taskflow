@@ -11,3 +11,11 @@ _backup-v4/
 _backup-v6/
 .claude/
 .taste-skill/
+
+# local environment overrides (e.g. .env.local for local mode)
+*.local
+
+# Playwright output
+playwright-report/
+test-results/
+.e2e/

@@ -1,6 +1,6 @@
 # TaskFlow
 
-A team task manager with accounts, shared workspaces and live sync, built with plain HTML, CSS and JavaScript. No framework and no build step; Supabase provides sign-in, the database and realtime updates.
+A team task manager with accounts, shared workspaces and live sync, built with React, Vite and TypeScript. Supabase provides sign-in, the database and realtime updates.
 
 **Live app:** https://adithyakammara.github.io/taskflow/
 
@@ -41,78 +41,82 @@ A team task manager with accounts, shared workspaces and live sync, built with p
 **Data and quality**
 
 - JSON backup and restore, and CSV export guarded against spreadsheet formula injection.
-- Keyboard accessible with visible focus, reduced-motion support, light and dark themes, a compact density option and layouts down to phone width.
+- Keyboard accessible with visible focus, reduced-motion support, light and dark themes, a compact density option and layouts down to phone width. Every page and the main dialogs pass an automated WCAG 2.1 AA scan (axe) in both themes.
+- Glass surfaces on the sidebar, top bar and dialogs, which turn solid when the browser cannot blur or the viewer asks for reduced transparency. Task rows, cards and forms stay solid for readability.
 
 ## How it works
 
-| Layer     | What it does                                                                                                                                         |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Front end | ES modules served as static files. One store holds the `{ projects, tasks }` document; views re-render from it.                                      |
-| Sync      | After each save, only the rows that changed are written. Teammates' changes arrive over Supabase Realtime. Failed writes retry; reconnects catch up. |
-| Database  | Supabase Postgres. Every table has Row Level Security, so people can only read and write workspaces they belong to.                                  |
-| Auth      | Supabase Auth with email and password. Joining a workspace is only possible through a valid invite (`accept_invite()`).                              |
-| Hosting   | GitHub Pages, deployed by GitHub Actions on every push to `main`.                                                                                    |
+| Layer     | What it does                                                                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Front end | React 19 and TypeScript (strict), built by Vite. One Zustand store holds the `{ projects, tasks }` document; views render from it. Tailwind CSS 4 maps the design tokens. |
+| Sync      | After each save, only the rows that changed are written. Teammates' changes arrive over Supabase Realtime. Failed writes retry; reconnects catch up.                      |
+| Database  | Supabase Postgres. Every table has Row Level Security, so people can only read and write workspaces they belong to.                                                       |
+| Auth      | Supabase Auth with email and password. Joining a workspace is only possible through a valid invite (`accept_invite()`).                                                   |
+| Hosting   | GitHub Pages at `/taskflow/`, deployed by GitHub Actions on every push to `main`. A Vercel project also builds every push (`vercel.json`), serving the app from `/`.      |
 
 A few choices worth knowing:
 
-- All user text is rendered with `textContent` through a small `el()` builder, and everything loaded from the database, storage or an imported file passes through `sanitize` first.
-- Diffing, selectors, the quick-add parser and the undo history are pure functions with unit tests.
+- React renders all user text as text, and everything loaded from the database, storage or an imported file passes through `sanitize` first.
+- Diffing, selectors, the quick-add parser, the undo history and the sync engine have unit tests; the main flows have end-to-end tests.
 - When two people edit the same task at the same moment, the last save wins.
+- The version 6 to 7 move from plain JavaScript to React is written up in [docs/MIGRATION-V7.md](docs/MIGRATION-V7.md).
 
 ## Run it locally
 
-Modules do not load from `file://`, so serve the folder over HTTP:
+Needs Node 22.12 or newer.
 
 ```bash
 npm install
 ```
 
 ```bash
-npm start
+npm run dev
 ```
 
-That serves http://localhost:5173 with a tiny zero-dependency server. `npm install` is only needed for tests, linting and formatting.
+That serves http://localhost:5173/taskflow/ with hot reload.
 
-**Local mode or cloud mode.** `src/backend/env.js` holds the Supabase project URL and public key. With both values set, the app asks people to sign in and syncs through Supabase. Leave them empty and it runs in local mode: no accounts, a demo team, and tasks saved only in that browser.
+**Local mode or cloud mode.** `.env` holds the Supabase project URL and public key. With both values set, the app asks people to sign in and syncs through Supabase. Leave them empty and it runs in local mode: no accounts, a demo team, and tasks saved only in that browser. To work in local mode without editing `.env`, create a `.env.local` (git-ignored) with both values set to nothing.
 
-**Use your own Supabase project.** Fork the repository, create a free Supabase project, run [`supabase/schema.sql`](supabase/schema.sql) in its SQL Editor, set your site address under Authentication, and put your project's URL and publishable key in `env.js`. [docs/SUPABASE.md](docs/SUPABASE.md) walks through each step.
+**Use your own Supabase project.** Fork the repository, create a free Supabase project, run [`supabase/schema.sql`](supabase/schema.sql) in its SQL Editor, set your site address under Authentication, and put your project's URL and publishable key in `.env`. [docs/SUPABASE.md](docs/SUPABASE.md) walks through each step.
 
 ## Project structure
 
 ```
 index.html
-css/              tokens, base, layout, components, views, dialogs, account (+ self-hosted font)
 src/
-  main.js         wires everything together
-  config.js       constants (statuses, priorities, team, limits)
-  backend/        Supabase settings, client, accounts, workspaces and live sync
-  model/          pure logic: sanitising, quick-add parser, selectors, row diffing
-  store/          state, undo/redo history, storage, actions
-  views/          dashboard, list, board, calendar, charts, app frame
-  ui/             sign-in and team, drawer, dialogs, palette, shortcuts, theme, toast
-  features/       sample data, import and export
-  utils/          dates, text, DOM builder, CSV
-supabase/         schema.sql: tables, Row Level Security, triggers, invite function
-tests/            unit tests for the pure logic
-scripts/serve.mjs static dev server
+  main.tsx, App.tsx  entry point and routes
+  app/               store (Zustand), actions, routes
+  components/        app frame (sidebar, top bar, page header), shared pieces, toast
+  features/          dashboard, tasks (list, drawer), board, calendar, palette and shortcuts,
+                     settings dialogs, auth (sign-in, workspaces, team)
+  lib/               logic with no React in it: config, types, model (sanitise, parser,
+                     selectors, diff), store (history, storage), supabase (client, sync), utils
+  styles/            design tokens, Tailwind setup, view styles, self-hosted fonts
+supabase/            schema.sql: tables, Row Level Security, triggers, invite function
+tests/               unit tests (Vitest)
+e2e/                 end-to-end and accessibility tests (Playwright, axe)
 ```
 
 ## Scripts
 
-| Command                           | What it does                                 |
-| --------------------------------- | -------------------------------------------- |
-| `npm start`                       | Serve the app locally                        |
-| `npm test`                        | Run unit tests (Node's built-in test runner) |
-| `npm run lint`                    | ESLint                                       |
-| `npm run format` / `format:check` | Prettier                                     |
-| `npm run check`                   | Lint, format check and tests together        |
+| Command                           | What it does                                                 |
+| --------------------------------- | ------------------------------------------------------------ |
+| `npm run dev`                     | Serve the app locally with hot reload                        |
+| `npm run build` / `preview`       | Production build into `dist/`, and serve that build          |
+| `npm test`                        | Unit tests (Vitest)                                          |
+| `npm run e2e`                     | End-to-end and accessibility tests (Playwright)              |
+| `npm run typecheck`               | TypeScript, strict                                           |
+| `npm run lint`                    | ESLint                                                       |
+| `npm run format` / `format:check` | Prettier                                                     |
+| `npm run check`                   | Lint, format check, typecheck, unit tests and build together |
 
-GitHub Actions runs `check` on every push and pull request (`.github/workflows/ci.yml`) and deploys to GitHub Pages on every push to `main` (`.github/workflows/pages.yml`).
+GitHub Actions runs `check` and the end-to-end tests on every push and pull request (`.github/workflows/ci.yml`), and deploys the build to GitHub Pages on every push to `main` (`.github/workflows/pages.yml`).
 
 ## Roadmap
 
 - [x] Dashboard, list, board and calendar views with tests and CI
 - [x] Accounts, workspaces, invite links and live team sync
+- [x] React, Vite and TypeScript front end with a refreshed design (v7)
 - [ ] Roles beyond owner and member (for example, view-only guests)
 - [ ] Rename and delete workspaces
 - [ ] Email notifications when a task is assigned to you
@@ -122,4 +126,4 @@ GitHub Actions runs `check` on every push and pull request (`.github/workflows/c
 
 Built by [Adithya Kammara](https://github.com/AdithyaKammara) · [LinkedIn](https://linkedin.com/in/adithyakammara)
 
-Font: [Figtree](https://github.com/erikdkennedy/figtree), under the SIL Open Font License (copy in `css/fonts/`). Licensed under MIT.
+Fonts: [Figtree](https://github.com/erikdkennedy/figtree) and [Bricolage Grotesque](https://github.com/ateliertriay/bricolage), under the SIL Open Font License (copies in `src/styles/fonts/`). Licensed under MIT.
