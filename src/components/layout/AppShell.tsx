@@ -5,6 +5,7 @@ import { PAGES } from '../../app/routes';
 import { useApp } from '../../app/store';
 import { CommandPalette } from '../../features/palette/CommandPalette';
 import { useShortcuts } from '../../features/palette/useShortcuts';
+import { InviteDialog } from '../../features/auth/InviteDialog';
 import { TeamDialog } from '../../features/auth/TeamDialog';
 import { Dialogs } from '../../features/settings/Dialogs';
 import { TaskDrawer } from '../../features/tasks/TaskDrawer';
@@ -102,6 +103,7 @@ export function AppShell() {
       <TaskDrawer />
       <Dialogs />
       <TeamDialog />
+      <InviteDialog />
       <CommandPalette />
       <Toast />
     </>
