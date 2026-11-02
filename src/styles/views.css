@@ -115,7 +115,7 @@ h1 {
 .pill.active {
   background: var(--accent-soft);
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .bulk {
@@ -140,6 +140,8 @@ h1 {
 
 .footer a {
   color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ---- responsive ---- */

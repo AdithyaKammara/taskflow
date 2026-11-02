@@ -292,26 +292,16 @@ function TaskCalendar({ tasks }: { tasks: Task[] }) {
       action={<ViewAll to="/calendar" label="Calendar" />}
     >
       <div className="mb-2 flex items-center justify-between">
-        <button
-          type="button"
-          className="link"
-          onClick={() => setDay(addDays(day, -7))}
-          aria-label="Previous week"
-        >
-          ‹ Prev
+        <button type="button" className="link" onClick={() => setDay(addDays(day, -7))}>
+          ‹ Previous week
         </button>
         {day !== today && (
           <button type="button" className="link" onClick={() => setDay(today)}>
             Today
           </button>
         )}
-        <button
-          type="button"
-          className="link"
-          onClick={() => setDay(addDays(day, 7))}
-          aria-label="Next week"
-        >
-          Next ›
+        <button type="button" className="link" onClick={() => setDay(addDays(day, 7))}>
+          Next week ›
         </button>
       </div>
       <div className="db-week" role="group" aria-label="Pick a day">
@@ -323,11 +313,15 @@ function TaskCalendar({ tasks }: { tasks: Task[] }) {
               type="button"
               className={`db-day${count ? ' has' : ''}`}
               aria-pressed={iso === day}
-              aria-label={`${fmtDate(iso)}${count ? `, ${count} open` : ''}`}
               onClick={() => setDay(iso)}
             >
+              {/* the visible day and date stay the start of the name; the rest is for screen readers */}
               {DOW[i]}
               <b>{fromISO(iso).getDate()}</b>
+              <span className="sr-only">
+                {fromISO(iso).toLocaleDateString(undefined, { month: 'long' })}
+                {count ? `, ${count} open` : ''}
+              </span>
             </button>
           );
         })}
