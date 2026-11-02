@@ -6,7 +6,7 @@ import { useView } from '../../app/useView';
 import { STATUSES } from '../../lib/config';
 import { SORTS, filteredTasks, projectOf } from '../../lib/model/selectors';
 import type { Doc, StatusId, Task } from '../../lib/types';
-import { Filters, PageHead } from '../../components/layout/PageHead';
+import { Filters } from '../../components/layout/Toolbar';
 import { Avatar, Bar, DueBadge, PriorityBadge, ProjectChip } from '../../components/shared';
 import { StatusSelect } from '../tasks/StatusSelect';
 
@@ -116,7 +116,6 @@ export function BoardView() {
 
   return (
     <>
-      <PageHead title="Board" />
       <Filters />
       <div className="board" ref={board}>
         {STATUSES.map((s) => {

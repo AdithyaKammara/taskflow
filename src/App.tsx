@@ -23,8 +23,8 @@ export function App() {
         <Routes>
           <Route element={<AppShell />}>
             <Route index element={<Dashboard />} />
-            <Route path="my-tasks" element={<ListView title="My tasks" />} />
-            <Route path="tasks" element={<ListView title="Tasks" />} />
+            <Route path="my-tasks" element={<ListView />} />
+            <Route path="tasks" element={<ListView />} />
             <Route path="board" element={<BoardView />} />
             <Route path="calendar" element={<CalendarView />} />
             <Route path="*" element={<Navigate to="/" replace />} />

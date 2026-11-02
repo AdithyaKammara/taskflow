@@ -14,8 +14,8 @@ const row = (page: Page, title: string) =>
 test('sample data fills the dashboard', async ({ page }) => {
   await seed(page);
   await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
-  await expect(page.locator('.start-row')).toHaveCount(3);
-  await expect(page.locator('.kpi')).toHaveCount(4);
+  await expect(page.getByRole('region', { name: 'Start here' }).locator('tbody tr')).toHaveCount(3);
+  await expect(page.locator('.db-stat')).toHaveCount(4);
   await expect(page.getByRole('img', { name: /Status breakdown/ })).toBeVisible();
 });
 

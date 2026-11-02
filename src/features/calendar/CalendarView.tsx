@@ -4,7 +4,7 @@ import { useView } from '../../app/useView';
 import { SORTS, filteredTasks, projectOf } from '../../lib/model/selectors';
 import type { Task } from '../../lib/types';
 import { addDays, fromISO, todayISO } from '../../lib/utils/dates';
-import { Filters, PageHead } from '../../components/layout/PageHead';
+import { Filters } from '../../components/layout/Toolbar';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -28,7 +28,6 @@ export function CalendarView() {
 
   return (
     <>
-      <PageHead title="Calendar" />
       <Filters />
       <div className="card">
         <div className="cal-scroll">

@@ -1,6 +1,7 @@
-import { CircleHelp, Menu, Moon, Redo2, Search, Sparkles, Sun, Undo2 } from 'lucide-react';
-import type { Ref } from 'react';
-import { quickAdd } from '../../app/actions';
+import { Menu, Moon, Redo2, Search, Sun, Undo2 } from 'lucide-react';
+import { useEffect, type Ref } from 'react';
+import { useLocation } from 'react-router';
+import { PAGES } from '../../app/routes';
 import {
   openDialog,
   redo,
@@ -10,7 +11,6 @@ import {
   undo,
   useApp,
 } from '../../app/store';
-import { parseQuickAdd } from '../../lib/model/parser';
 import { pad } from '../../lib/utils/dates';
 import { Icon } from '../shared';
 
@@ -18,9 +18,6 @@ interface Props {
   navOpen: boolean;
   onMenu: () => void;
   menuRef: Ref<HTMLButtonElement>;
-  quick: string;
-  setQuick: (text: string) => void;
-  setQuickError: (msg: string) => void;
 }
 
 function PomoButton() {
@@ -45,17 +42,25 @@ function PomoButton() {
   );
 }
 
-export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickError }: Props) {
+/** The header: menu (phones), page title, search, focus timer, undo/redo and theme. */
+export function TopBar({ navOpen, onMenu, menuRef }: Props) {
   const theme = useApp((s) => s.theme);
   const canUndo = useApp((s) => s.canUndo);
   const canRedo = useApp((s) => s.canRedo);
+  const project = useApp((s) => s.doc.projects.find((p) => p.id === s.project));
+  const { pathname } = useLocation();
+  const title = (PAGES.find((p) => p.path === pathname) ?? PAGES[0]).label;
+
+  useEffect(() => {
+    document.title = `${title} · TaskFlow`;
+  }, [title]);
 
   return (
-    <header className="topbar glass sticky top-0 z-20 flex flex-wrap items-center gap-2 border-b px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5 tablet:flex-nowrap tablet:px-7">
+    <header className="topbar sticky top-0 z-20 flex min-h-16 items-center gap-2 border-b border-border bg-surface px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5 tablet:px-7">
       <button
         ref={menuRef}
         type="button"
-        className="icon-btn mr-auto tablet:hidden"
+        className="icon-btn tablet:hidden"
         aria-label="Open menu"
         aria-controls="sidebar"
         aria-expanded={navOpen}
@@ -64,42 +69,16 @@ export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickErro
         <Icon icon={Menu} size={20} />
       </button>
 
-      <form
-        className="order-last flex min-w-0 flex-[1_0_100%] gap-2 tablet:order-none tablet:flex-1"
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          const error = quickAdd(parseQuickAdd(quick));
-          setQuickError(error);
-          if (!error) setQuick('');
-        }}
-      >
-        <label className="sr-only" htmlFor="quickInput">
-          Quick add task
-        </label>
-        <input
-          id="quickInput"
-          className="field min-w-0 flex-1"
-          type="text"
-          autoComplete="off"
-          maxLength={200}
-          placeholder="Add a task… e.g. Review PR tomorrow @priya #dev !high"
-          aria-describedby="quickHint quickError"
-          value={quick}
-          onChange={(e) => {
-            setQuick(e.target.value);
-            setQuickError('');
-          }}
-        />
-        <button className="btn btn-primary" type="submit">
-          Add
-        </button>
-      </form>
+      <div className="mr-auto flex min-w-0 items-baseline gap-2">
+        <h1 className="truncate text-[1.35rem] leading-tight font-semibold">{title}</h1>
+        {project && (
+          <span className="hidden truncate text-sm text-muted sm:inline">· {project.name}</span>
+        )}
+      </div>
 
-      <PomoButton />
       <button
         type="button"
-        className="btn ghost palette-btn"
+        className="search-pill"
         title="Open command palette"
         onClick={() => openDialog('palette')}
       >
@@ -107,10 +86,7 @@ export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickErro
         <span>Search</span>
         <kbd>Ctrl K</kbd>
       </button>
-      <button type="button" className="btn ghost next-btn" onClick={() => openDialog('next')}>
-        <Icon icon={Sparkles} size={16} />
-        <span>What next?</span>
-      </button>
+      <PomoButton />
       <button
         type="button"
         className="icon-btn"
@@ -119,7 +95,7 @@ export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickErro
         disabled={!canUndo}
         onClick={undo}
       >
-        <Icon icon={Undo2} size={20} />
+        <Icon icon={Undo2} size={19} />
       </button>
       <button
         type="button"
@@ -129,16 +105,7 @@ export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickErro
         disabled={!canRedo}
         onClick={redo}
       >
-        <Icon icon={Redo2} size={20} />
-      </button>
-      <button
-        type="button"
-        className="icon-btn help-btn"
-        aria-label="Keyboard shortcuts (?)"
-        title="Keyboard shortcuts (?)"
-        onClick={() => openDialog('help')}
-      >
-        <Icon icon={CircleHelp} size={20} />
+        <Icon icon={Redo2} size={19} />
       </button>
       <button
         type="button"
@@ -146,7 +113,7 @@ export function TopBar({ navOpen, onMenu, menuRef, quick, setQuick, setQuickErro
         aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         onClick={toggleTheme}
       >
-        <Icon icon={theme === 'dark' ? Sun : Moon} size={20} />
+        <Icon icon={theme === 'dark' ? Sun : Moon} size={19} />
       </button>
     </header>
   );
