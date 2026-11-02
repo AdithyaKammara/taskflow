@@ -5,7 +5,7 @@ import { useView } from '../../app/useView';
 import { STATUSES } from '../../lib/config';
 import { SORTS, filteredTasks, projectOf } from '../../lib/model/selectors';
 import type { Doc, StatusId, Task } from '../../lib/types';
-import { Filters, PageHead } from '../../components/layout/PageHead';
+import { Filters } from '../../components/layout/Toolbar';
 import { Avatar, DueBadge, EmptyState, PriorityBadge, ProjectChip } from '../../components/shared';
 import { StatusSelect } from './StatusSelect';
 
@@ -101,7 +101,7 @@ function BulkBar() {
   );
 }
 
-export function ListView({ title }: { title: string }) {
+export function ListView() {
   const view = useView();
   const sort = useApp((s) => s.sort);
   const selected = useApp((s) => s.selected);
@@ -117,13 +117,12 @@ export function ListView({ title }: { title: string }) {
 
   return (
     <>
-      <PageHead title={title} />
       <Filters sort />
       <BulkBar />
       {!tasks.length ? (
         <EmptyState filtered={doc.tasks.length > 0} />
       ) : (
-        <div className="card table">
+        <div className="card task-table">
           <div className="row head">
             <label className="sel">
               <input

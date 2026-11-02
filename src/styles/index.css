@@ -92,6 +92,76 @@
     text-align: left;
   }
 
+  /* header search: opens the command palette */
+  .search-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 220px;
+    min-height: var(--ctl-h);
+    padding: 0 8px 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .search-pill:hover {
+    border-color: var(--border-strong);
+    color: var(--text-2);
+  }
+  .search-pill kbd {
+    margin-left: auto;
+  }
+
+  /* the toolbar under the header: quick add, new project, project filter */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .quick-add {
+    display: flex;
+    flex: 1 1 360px;
+    align-items: center;
+    gap: 8px;
+    max-width: 640px;
+    min-height: var(--ctl-h);
+    padding: 3px 3px 3px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    color: var(--muted);
+  }
+  .quick-add:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .quick-add input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    outline: none; /* the whole field shows the focus ring (:focus-within above) */
+  }
+  .quick-add input::placeholder {
+    color: var(--muted);
+  }
+
+  @media (max-width: 760px) {
+    .search-pill {
+      min-width: 0;
+    }
+    .search-pill span,
+    .search-pill kbd {
+      display: none;
+    }
+  }
+
   .skip-link {
     position: absolute;
     left: 12px;

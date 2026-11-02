@@ -47,7 +47,7 @@ export function LocalProfile() {
       <Avatar id={me?.id || ''} />
       <div className="account-text">
         <strong className="account-name">{me?.name || 'You'}</strong>
-        <span className="account-sync">Local mode · saved in this browser</span>
+        <span className="account-sync">Saved in this browser</span>
       </div>
     </div>
   );

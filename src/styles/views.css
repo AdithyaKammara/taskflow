@@ -592,7 +592,7 @@ textarea.field {
 
 /* ---- list ---- */
 
-.table {
+.task-table {
   overflow: hidden;
 }
 
@@ -605,7 +605,7 @@ textarea.field {
   border-bottom: 1px solid var(--border);
 }
 
-.table ul > .row:last-child {
+.task-table ul > .row:last-child {
   border-bottom: 0;
 }
 
