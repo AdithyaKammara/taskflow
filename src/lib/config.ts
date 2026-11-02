@@ -12,6 +12,7 @@ export const KEYS = {
   theme: 'todo-app:theme',
   density: 'todo-app:density',
   view: 'todo-app:view',
+  sidebar: 'todo-app:sidebar',
   workspace: 'todo-app:workspace',
   invite: 'todo-app:invite',
 };

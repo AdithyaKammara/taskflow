@@ -440,6 +440,7 @@ textarea.field {
   width: 26px;
   height: 26px;
   border-radius: 50%;
+  background: #52525b; /* browsers without oklch(from …) keep this grey */
   color: #fff;
   font-size: 0.68rem;
   font-weight: 700;
@@ -592,161 +593,12 @@ textarea.field {
 }
 /* The five main screens: list, board, calendar, dashboard. */
 
-/* ---- list ---- */
-
-.task-table {
-  overflow: hidden;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: var(--row-pad) 14px;
-  border-bottom: 1px solid var(--border);
-}
-
-.task-table ul > .row:last-child {
-  border-bottom: 0;
-}
-
-.row.head {
-  display: none;
-}
-
-.row:not(.head):hover {
-  background: var(--surface-2);
-}
-
-.row.selected {
-  background: var(--accent-soft);
-}
-
-.row.status-done .title-btn {
-  color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-color: var(--border-strong);
-}
-
-.sel {
-  display: grid;
-  place-items: center;
-}
+/* ---- checkboxes ---- */
 
 input[type='checkbox'] {
   width: 17px;
   height: 17px;
   accent-color: var(--accent);
-}
-
-.row-side {
-  display: grid;
-  grid-template-columns: 26px 72px 132px 124px;
-  align-items: center;
-  gap: 10px;
-}
-
-.row-side .badge.p-low,
-.row-side .badge.p-medium,
-.row-side .badge.p-high {
-  justify-self: start;
-}
-
-@media (min-width: 901px) {
-  .row {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-  }
-}
-
-@media (max-width: 760px) {
-  .row {
-    grid-template-columns: 30px minmax(0, 1fr);
-  }
-
-  .row-side {
-    grid-column: 2;
-    grid-template-columns: repeat(2, auto);
-    justify-content: start;
-  }
-}
-
-/* ---- board ---- */
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
-  gap: 14px;
-  align-items: start;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.column {
-  padding: 10px;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
-  transition: background 0.15s;
-}
-
-.column.drag-over {
-  background: var(--accent-soft);
-  outline: 2px dashed var(--accent);
-  outline-offset: -2px;
-}
-
-.col-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 4px 10px;
-  font: 650 0.95rem var(--font-ui);
-}
-
-.cards {
-  display: grid;
-  gap: 8px;
-  min-height: 60px;
-}
-
-.task-card {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  cursor: grab;
-  box-shadow: 0 1px 0 var(--border);
-}
-
-.task-card:hover {
-  box-shadow: var(--shadow-lift);
-}
-
-.task-card.dragging {
-  opacity: 0.4;
-}
-
-.task-card.is-done .title-btn {
-  color: var(--muted);
-}
-
-.card-foot,
-.sub-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sub-line .bar {
-  flex: 1;
-}
-
-.drop-hint {
-  padding: 18px 8px;
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-align: center;
 }
 
 /* ---- calendar ---- */
@@ -856,12 +708,14 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 /* ---- modals ---- */
 
 .modal {
+  /* Tailwind's reset zeroes the browser's margin: auto, which is what centres a dialog */
+  margin: auto;
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);
   max-height: calc(100dvh - 48px);
@@ -1004,7 +858,7 @@ dialog::backdrop {
 
 .palette {
   width: min(600px, calc(100vw - 32px));
-  margin-top: 12vh;
+  margin: 12vh auto auto;
   border-radius: var(--r-lg);
   overflow: hidden;
 }
@@ -1139,6 +993,16 @@ dialog::backdrop {
 .prop.block {
   grid-template-columns: 1fr;
   gap: 4px;
+}
+
+/* Tailwind's .block utility (display: block) wins over the grid above: stack label and field */
+.prop.block > .prop-label {
+  display: block;
+  margin-bottom: 4px;
+}
+.prop.block > .field {
+  display: block;
+  width: 100%;
 }
 
 .prop-label {
@@ -1292,15 +1156,6 @@ dialog::backdrop {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
-@media (max-width: 900px) {
-  .board {
-    scroll-snap-type: x proximity;
-  }
-  .column {
-    scroll-snap-align: start;
-  }
-}
-
 /* ---- large phones ---- */
 @media (max-width: 760px) {
   /* filters: search on top, selects share a row, pills scroll sideways */
@@ -1322,17 +1177,6 @@ dialog::backdrop {
   }
   .pill {
     flex: none;
-  }
-
-  /* list rows: title on top, details wrap underneath */
-  .row-side {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-  .row-side .status-select {
-    margin-left: auto;
   }
 
   .bulk {
@@ -1377,9 +1221,6 @@ dialog::backdrop {
 @media (max-width: 520px) {
   h1 {
     font-size: 1.5rem;
-  }
-  .board {
-    grid-template-columns: repeat(4, minmax(78vw, 1fr));
   }
   .drawer-body {
     padding: 16px;
@@ -1436,9 +1277,6 @@ dialog::backdrop {
   .title-btn {
     padding-block: 4px;
   }
-  .task-card {
-    cursor: default;
-  }
 }
 
 /* ---- small text settings / browser zoom: let long words wrap ---- */
@@ -1448,118 +1286,7 @@ dialog::backdrop {
   overflow-wrap: anywhere;
 }
 
-/* ---- scrollable board: visible, grabbable scrollbar and mouse panning ---- */
-.board {
-  overscroll-behavior-x: contain;
-  scrollbar-width: auto;
-  scrollbar-color: var(--border-strong) var(--surface-2);
-  cursor: grab;
-}
-
-.board::-webkit-scrollbar {
-  height: 12px;
-}
-
-.board::-webkit-scrollbar-track {
-  background: var(--surface-2);
-  border-radius: 999px;
-}
-
-.board::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 999px;
-  border: 2px solid var(--surface-2);
-}
-
-.board::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
-}
-
-.board.panning {
-  cursor: grabbing;
-  user-select: none;
-  scroll-snap-type: none;
-}
-
-.board .task-card {
-  cursor: grab;
-}
-
-/* ---- accounts and teams (v6 css/account.css; App.tsx swaps the app for the sign-in card) ---- */
-
-.auth {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 24px 16px;
-  background: var(--bg);
-}
-
-.auth-card {
-  width: min(400px, 100%);
-  padding: 28px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-}
-
-.auth-brand {
-  padding: 0 0 20px;
-}
-
-.auth-brand .logo {
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-
-.auth-title {
-  margin-bottom: 16px;
-  font-size: 1.6rem;
-}
-
-.auth-note {
-  margin-bottom: 14px;
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-size: 0.9rem;
-}
-
-.auth-form {
-  display: grid;
-  gap: 12px;
-}
-
-.auth-form .field {
-  width: 100%;
-}
-
-.auth-form .field[aria-invalid='true'] {
-  border-color: var(--danger);
-}
-
-.auth-form .muted {
-  margin-top: -6px;
-}
-
-.auth-submit {
-  width: 100%;
-  margin-top: 4px;
-}
-
-.auth-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.auth-links .link {
-  padding-inline: 0;
-}
+/* ---- accounts and teams: the sign-in screen is styled in auth.css ---- */
 
 /* ---- sidebar: workspace switcher and account ---- */
 

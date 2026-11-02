@@ -9,7 +9,7 @@ async function seed(page: Page) {
 }
 
 const row = (page: Page, title: string) =>
-  page.locator('li.row').filter({ has: page.getByRole('button', { name: title, exact: true }) });
+  page.locator('tr.tl-row').filter({ has: page.getByRole('button', { name: title, exact: true }) });
 
 test('sample data fills the dashboard', async ({ page }) => {
   await seed(page);
@@ -29,7 +29,7 @@ test('quick add parses the task and it survives a reload', async ({ page }) => {
   await page.reload();
   const r = row(page, 'Review PR');
   await expect(r).toContainText('#dev');
-  await expect(r).toContainText('Due tomorrow');
+  await expect(r).toContainText('Tomorrow');
   await expect(r.getByLabel('Priya Sharma')).toBeVisible();
 });
 
@@ -73,13 +73,35 @@ test('dragging a card moves it to another column', async ({ page }) => {
   await seed(page);
   await page.goto('./board');
   const column = (id: string) =>
-    page.locator('section.column').filter({ has: page.locator(`#col-${id}`) });
+    page.locator('section.kb-col').filter({ has: page.locator(`#col-${id}`) });
   // the first card, so the board does not scroll between measuring it and pressing on it
-  const card = column('todo').locator('.task-card').first();
-  const title = (await card.locator('.title-btn').textContent())!;
+  const card = column('todo').locator('.kb-card').first();
+  const title = (await card.locator('.kb-title').textContent())!;
   await card.dragTo(column('review'));
   await expect(column('review')).toContainText(title);
   await expect(column('todo')).not.toContainText(title);
+});
+
+test('the keyboard picks a card up, carries it and drops it', async ({ page }) => {
+  await seed(page);
+  await page.goto('./board');
+  const column = (id: string) =>
+    page.locator('section.kb-col').filter({ has: page.locator(`#col-${id}`) });
+  const card = column('todo').locator('.kb-card').first();
+  const title = (await card.locator('.kb-title').textContent())!;
+  await card.focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('status').filter({ hasText: 'In review' })).toBeAttached();
+  await page.keyboard.press('Space');
+  await expect(column('review')).toContainText(title);
+  await expect(page.getByRole('button', { name: title })).toBeFocused();
+  // Escape puts a carried card back
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Escape');
+  await expect(column('review')).toContainText(title);
 });
 
 test('the command palette navigates', async ({ page }) => {

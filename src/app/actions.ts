@@ -43,8 +43,14 @@ export function addTask(fields: {
   tags: string[];
   assignee: string;
   project: string;
+  status?: StatusId;
 }) {
-  const t = sanitizeTask({ ...fields, status: 'todo' });
+  const status = fields.status ?? 'todo';
+  const t = sanitizeTask({
+    ...fields,
+    status,
+    completedAt: status === 'done' ? Date.now() : null,
+  });
   if (!t) return null;
   log(t, 'Task created');
   change((doc) => {
@@ -162,19 +168,22 @@ export function addComment(id: string, raw: string) {
 }
 
 /** Quick add: returns an error message, or '' when the task was added. */
-export function quickAdd(p: {
-  title: string;
-  priority: Priority;
-  due: string;
-  tags: string[];
-  assignee: string;
-}) {
+export function quickAdd(
+  p: {
+    title: string;
+    priority: Priority;
+    due: string;
+    tags: string[];
+    assignee: string;
+  },
+  status?: StatusId
+) {
   if (!p.title) return 'Type a task title first. Dates, tags and @names alone are not a task.';
   if (p.title.length > MAX_TITLE) return `Keep the title under ${MAX_TITLE} characters.`;
   const { doc, project, assignee } = useApp.getState();
   const proj =
     doc.projects.find((x) => x.id === project) || doc.projects.find((x) => x.id === INBOX)!;
-  addTask({ ...p, assignee: p.assignee || assignee, project: proj.id });
+  addTask({ ...p, assignee: p.assignee || assignee, project: proj.id, status });
   toast(`Added to ${proj.name}`);
   return '';
 }

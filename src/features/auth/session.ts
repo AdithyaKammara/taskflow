@@ -46,6 +46,8 @@ interface SessionState {
   workspaces: Workspace[];
   workspaceId: string | null;
   members: WorkspaceMember[];
+  /** An invite link was opened: ask before joining (a link alone must not move anyone in). */
+  pendingInvite: boolean;
 }
 
 export const useSession = create<SessionState>(() => ({
@@ -57,6 +59,7 @@ export const useSession = create<SessionState>(() => ({
   workspaces: [],
   workspaceId: null,
   members: [],
+  pendingInvite: false,
 }));
 
 const set = useSession.setState;
@@ -145,16 +148,6 @@ async function enter(authUser: User) {
   set({ user });
   showAuth('loading', 'Opening your workspace…');
   try {
-    let joined: string | null = null;
-    const invite = readPref(KEYS.invite);
-    if (invite) {
-      writePref(KEYS.invite, '');
-      try {
-        joined = await acceptInvite(invite);
-      } catch (err) {
-        setTimeout(() => toast((err as Error).message), 0);
-      }
-    }
     let workspaces = await listWorkspaces();
     if (!workspaces.length) {
       await createWorkspace(`${user.name.split(' ')[0]}'s workspace`);
@@ -162,10 +155,9 @@ async function enter(authUser: User) {
     }
     set({ workspaces });
     const saved = readPref(KEYS.workspace);
-    const pick = joined || (workspaces.some((w) => w.id === saved) ? saved! : workspaces[0].id);
-    await openWorkspace(pick);
-    set({ status: 'in' });
-    if (joined) toast(`You joined ${currentWorkspace()?.name || 'the workspace'}`);
+    await openWorkspace(workspaces.some((w) => w.id === saved) ? saved! : workspaces[0].id);
+    // an invite is only accepted once the person confirms it (InviteDialog)
+    set({ status: 'in', pendingInvite: Boolean(readPref(KEYS.invite)) });
   } catch (err) {
     set({ user: null });
     showAuth('signin', '', `Could not open your workspace: ${(err as Error).message}`);
@@ -174,7 +166,7 @@ async function enter(authUser: User) {
 
 async function leaveApp() {
   await stopSync();
-  set({ user: null, workspaceId: null, workspaces: [], members: [] });
+  set({ user: null, workspaceId: null, workspaces: [], members: [], pendingInvite: false });
   setMembers([], '');
   replaceAll({});
   useApp.setState({ dialog: null });
@@ -241,6 +233,28 @@ export async function newWorkspace(raw: string) {
 }
 
 export const inviteLink = () => createInvite(get().workspaceId!);
+
+/** The person confirmed the invite: join, open that workspace and remember it as the default. */
+export async function acceptPendingInvite() {
+  const token = readPref(KEYS.invite);
+  writePref(KEYS.invite, '');
+  set({ pendingInvite: false });
+  if (!token) return;
+  try {
+    const id = await acceptInvite(token);
+    set({ workspaces: await listWorkspaces() });
+    await openWorkspace(id);
+    toast(`You joined ${currentWorkspace()?.name || 'the workspace'}`);
+  } catch (err) {
+    toast((err as Error).message);
+  }
+}
+
+/** The person said no (or closed the question): forget the invite; the link still works later. */
+export function declinePendingInvite() {
+  writePref(KEYS.invite, '');
+  set({ pendingInvite: false });
+}
 
 export async function removeFromWorkspace(userId: string) {
   try {

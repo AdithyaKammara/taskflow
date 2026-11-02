@@ -156,6 +156,7 @@ const SHORTCUTS: [string, string[]][] = [
   ['Start / Pause Focus Timer', ['F']],
   ['Undo Last Action', ['Ctrl', 'Z']],
   ['Redo Action', ['Ctrl', 'Shift', 'Z']],
+  ['Pin / Fold Sidebar', ['[']],
   ['Show Shortcuts', ['?']],
   ['Close Panels / Dialogs', ['Esc']],
 ];

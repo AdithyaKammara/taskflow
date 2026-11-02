@@ -1,0 +1,307 @@
+/*
+ * Task list (features/tasks/ListView): one card holding a numbered table. Muted header, hairline
+ * rows that rise in one after another, status as a coloured pill you can change in place.
+ * Below 760px each row folds into a compact card.
+ */
+
+.tl-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  corner-shape: squircle;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.tl-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 18px 20px 14px;
+}
+.tl-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.tl-count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 7px;
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  color: var(--text-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tl-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.tl-bar {
+  width: 120px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+.tl-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--st-done);
+  transition: width 400ms var(--ease);
+}
+
+.tl-scroll {
+  overflow-x: auto;
+}
+
+.tl-table {
+  width: 100%;
+  /* separate, so each cell owns its border and fades in with its row */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.tl-table th {
+  padding: 10px 12px;
+  border-block: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  animation: tl-fade 500ms ease-out;
+}
+.tl-table td {
+  padding: calc(var(--row-pad) + 4px) 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.tl-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tl-table :is(th, td):first-child {
+  padding-left: 20px;
+}
+.tl-table :is(th, td):last-child {
+  padding-right: 20px;
+}
+
+.tl-row {
+  transition: background-color var(--t-fast) var(--ease);
+}
+.tl-row > td {
+  animation: tl-rise 520ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+.tl-row:hover {
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+.tl-row.is-selected {
+  background: var(--accent-soft);
+}
+@keyframes tl-rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+@keyframes tl-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.tl-sel {
+  width: 20px;
+}
+.tl-sel input {
+  display: block;
+}
+.tl-num {
+  width: 44px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tl-who {
+  width: 56px;
+}
+
+.tl-task {
+  min-width: 260px;
+}
+.tl-title {
+  padding: 0;
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.tl-title:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tl-row.is-done .tl-title {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
+}
+.tl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.tl-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+}
+.tl-project i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* status: a pill in the status colours that is also the dropdown to change it */
+.tl-status .status-select {
+  min-height: 28px;
+  padding: 0 26px 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, var(--c) 3.5px, transparent 4px) 9px 50% / 8px 8px no-repeat,
+    var(--tag-bg);
+  color: var(--tag-fg);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tl-due {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+td.tl-due {
+  font-size: 0.82rem;
+}
+.tl-due-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tl-due-icon {
+  flex: none;
+  color: var(--muted);
+}
+.tl-due.soon {
+  color: var(--warn);
+  font-weight: 600;
+}
+.tl-due.late {
+  color: var(--danger);
+  font-weight: 600;
+}
+.tl-due:is(.soon, .late) .tl-due-icon {
+  color: currentColor;
+}
+.tl-none {
+  color: var(--muted);
+}
+
+/* ---- phones: each row becomes a compact card ---- */
+@media (max-width: 760px) {
+  .tl-head {
+    padding: 14px 14px 12px;
+  }
+  .tl-bar {
+    width: 80px;
+  }
+  .tl-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .tl-table tbody tr:first-child {
+    border-top: 1px solid var(--border);
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 24px auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tl-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .tl-table .tl-row td {
+    padding: 0;
+    border: 0;
+  }
+  .tl-row .tl-sel {
+    grid-row: 1;
+    align-self: start;
+    padding-top: 2px;
+  }
+  .tl-row .tl-num {
+    display: none;
+  }
+  .tl-row .tl-task {
+    grid-row: 1;
+    grid-column: 2 / 5;
+    min-width: 0;
+  }
+  /* first line ends with the due date; the second holds avatar, priority and status */
+  .tl-row :is(.tl-who, .tl-prio, .tl-status) {
+    grid-row: 2;
+    width: auto;
+  }
+  .tl-row .tl-status {
+    justify-self: start;
+  }
+  .tl-row .tl-who {
+    grid-column: 2;
+  }
+  .tl-row .tl-prio {
+    grid-column: 3;
+  }
+  .tl-row .tl-status {
+    grid-column: 4;
+  }
+  .tl-row .tl-due {
+    grid-row: 1;
+    grid-column: 5;
+    align-self: start;
+    justify-self: end;
+    padding-top: 1px;
+  }
+}
