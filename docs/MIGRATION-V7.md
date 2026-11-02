@@ -249,6 +249,17 @@ Notes:
   - The README screenshots still show v6.
   - Real sign-in, invite and two-browser sync testing against the live project (see Phase 5).
 
+**After v7: invite links ask before joining.**
+
+- **Why:** a security review found that opening an invite link while signed in joined that workspace and switched to it without asking. v6 did the same. Someone could send a link to their own workspace, and its members would see the tasks you added there.
+- **What happens now:**
+  - Signing in opens your usual workspace, then shows "Join a workspace?" (`features/auth/InviteDialog.tsx`).
+  - The invite is accepted, opened and remembered as your default only after **Join workspace** (`acceptPendingInvite()` in `session.ts`).
+  - **Not now**, Escape or a click on the backdrop forgets the invite (`declinePendingInvite()`). The link itself still works until it expires.
+  - A new account that signs up through an invite now gets its own workspace first, then the question.
+- **Limitation:** the dialog can't name the workspace or who sent the link, because Row Level Security hides a workspace from people who aren't members yet. Showing them would need a new `security definer` function in the schema.
+- **Tests:** `tests/session.test.ts` checks three things: signing in doesn't accept the invite; confirming accepts it and opens that workspace; declining doesn't accept it.
+
 ## 7. Risks
 
 | Risk | Mitigation |

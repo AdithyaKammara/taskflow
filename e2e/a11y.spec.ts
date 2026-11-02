@@ -13,6 +13,10 @@ async function scan(page: Page) {
 // axe takes a while on the busier pages, especially with several workers running
 test.describe.configure({ timeout: 90_000 });
 
+// Scan the settled page: rows and cards fade in, and axe reads a half-faded row as low contrast.
+// The app turns its entrance animations off for reduced motion, so ask for that here.
+test.use({ reducedMotion: 'reduce' });
+
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`${theme} theme`, () => {
     test.beforeEach(async ({ page }) => {

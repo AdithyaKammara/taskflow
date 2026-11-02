@@ -1,6 +1,6 @@
 /** Global keyboard shortcuts: Ctrl/Cmd+K, Ctrl/Cmd+Z / Shift+Z / Y, and N, /, F, ? (v6 ui/shortcuts.js). */
 import { useEffect } from 'react';
-import { openDialog, redo, togglePomo, undo } from '../../app/store';
+import { openDialog, redo, toggleNavPinned, togglePomo, undo } from '../../app/store';
 import { focusQuickAdd } from './CommandPalette';
 
 export function useShortcuts() {
@@ -43,6 +43,9 @@ export function useShortcuts() {
       } else if (key === 'f') {
         e.preventDefault();
         togglePomo();
+      } else if (e.key === '[') {
+        e.preventDefault();
+        toggleNavPinned();
       } else if (e.key === '?') {
         e.preventDefault();
         openDialog('help');

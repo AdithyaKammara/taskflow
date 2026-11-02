@@ -2,6 +2,9 @@
 @import './tokens.css';
 @import './views.css' layer(components);
 @import './dashboard.css' layer(components);
+@import './board.css' layer(components);
+@import './auth.css' layer(components);
+@import './list.css' layer(components);
 
 /*
  * Tokens as Tailwind utilities: bg-surface, text-muted, border-border, rounded-md, text-accent-text…
@@ -90,6 +93,102 @@
   }
   button.nav-item {
     text-align: left;
+  }
+
+  /*
+   * Sidebar states (wide screens): rail = icons only, peek = open over the page (hover or keyboard
+   * focus), pinned = open and part of the layout. Labels fade and nudge in like a sliding drawer.
+   */
+  .sb .nav-item {
+    padding-inline: 11px; /* centres the 18px icon in the 40px rail column */
+    white-space: nowrap;
+  }
+  .sb-text,
+  .sb-fade,
+  .sb .nav-label,
+  .sb .account-text,
+  .sb .account .icon-btn {
+    transition:
+      opacity 160ms var(--ease),
+      translate 200ms var(--ease);
+  }
+  .sb-text {
+    white-space: nowrap;
+  }
+  .sb-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 7px;
+    height: 7px;
+    border: 1.5px solid var(--sidebar);
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 160ms var(--ease);
+  }
+
+  @media (min-width: 900px) {
+    .sb {
+      width: var(--rail-w);
+      transition:
+        width 220ms var(--ease),
+        box-shadow 220ms var(--ease);
+    }
+    .sb:is([data-state='peek'], [data-state='pinned']) {
+      width: var(--sidebar-w);
+    }
+    .sb[data-state='peek'] {
+      box-shadow: var(--shadow-pop);
+    }
+    .sb[data-state='peek'] .sb-text,
+    .sb[data-state='peek'] .sb-fade {
+      transition-delay: 60ms; /* let the panel widen before the words appear */
+    }
+    .sb:is([data-state='peek'], [data-state='pinned']) .nav-item:hover .sb-text {
+      translate: 3px 0;
+    }
+
+    .sb[data-state='rail'] :is(.sb-text, .sb-fade, .nav-label, .account-text, .account .icon-btn) {
+      opacity: 0;
+      translate: -6px 0;
+      pointer-events: none;
+    }
+    .sb[data-state='rail'] .sb-dot {
+      opacity: 1;
+    }
+    /* section headings fold into a short divider */
+    .sb .nav-label-group {
+      position: relative;
+    }
+    .sb .nav-label-group::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      width: 16px;
+      height: 1px;
+      background: var(--border-strong);
+      opacity: 0;
+      transition: opacity 160ms var(--ease);
+    }
+    .sb[data-state='rail'] .nav-label-group::after {
+      opacity: 1;
+    }
+    /* the profile card becomes just the avatar */
+    .sb .account {
+      transition:
+        padding 220ms var(--ease),
+        border-color 160ms var(--ease),
+        background-color 160ms var(--ease),
+        box-shadow 160ms var(--ease);
+    }
+    .sb[data-state='rail'] .account {
+      padding-left: 2px;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
   }
 
   /* header search: opens the command palette */

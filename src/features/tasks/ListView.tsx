@@ -1,46 +1,78 @@
-/** The task list: sortable, filterable rows with selection for bulk actions. */
+/**
+ * The task list: a numbered table of the filtered tasks (title with project, tags and subtask
+ * progress; assignee; priority; status; due date), with row selection for bulk actions.
+ * Rows rise in, staggered, when they first appear. Below 760px each row becomes a small card.
+ */
+import { CalendarDays } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { bulkAssign, bulkDelete, bulkStatus } from '../../app/actions';
 import { openDrawer, toggleSelected, useApp } from '../../app/store';
 import { useView } from '../../app/useView';
+import { Filters } from '../../components/layout/Toolbar';
+import { Avatar, EmptyState } from '../../components/shared';
 import { STATUSES } from '../../lib/config';
 import { SORTS, filteredTasks, projectOf } from '../../lib/model/selectors';
 import type { Doc, StatusId, Task } from '../../lib/types';
-import { Filters } from '../../components/layout/Toolbar';
-import { Avatar, DueBadge, EmptyState, PriorityBadge, ProjectChip } from '../../components/shared';
+import { PriorityChip, ProgressRing, dueInfo } from '../board/BoardCard';
 import { StatusSelect } from './StatusSelect';
 
-function TaskRow({ t, doc, selected }: { t: Task; doc: Doc; selected: boolean }) {
-  const nSub = t.subtasks.length;
-  const dSub = t.subtasks.filter((s) => s.done).length;
+/** Rows after this many appear together, so a long list never waits on its own animation. */
+const STAGGER_ROWS = 14;
+
+function TaskRow({ t, n, doc, selected }: { t: Task; n: number; doc: Doc; selected: boolean }) {
+  const subs = t.subtasks.length;
+  const subsDone = t.subtasks.filter((s) => s.done).length;
+  const project = projectOf(doc, t);
+  const due = dueInfo(t);
   return (
-    <li className={`row status-${t.status}${selected ? ' selected' : ''}`}>
-      <label className="sel">
+    <tr
+      className={`tl-row${t.status === 'done' ? ' is-done' : ''}${selected ? ' is-selected' : ''}`}
+      style={{ '--i': Math.min(n - 1, STAGGER_ROWS) } as CSSProperties}
+    >
+      <td className="tl-sel">
         <input
           type="checkbox"
           checked={selected}
           aria-label={`Select "${t.title}"`}
           onChange={(e) => toggleSelected(t.id, e.target.checked)}
         />
-      </label>
-      <div>
-        <button type="button" className="title-btn" onClick={() => openDrawer(t.id)}>
+      </td>
+      <td className="tl-num">{n}</td>
+      <td className="tl-task">
+        <button type="button" className="tl-title" onClick={() => openDrawer(t.id)}>
           {t.title}
         </button>
-        <div className="meta">
-          <ProjectChip project={projectOf(doc, t)} />
-          {nSub > 0 && <span className="sub-prog">{`${dSub}/${nSub} subtasks`}</span>}
-          {t.tags.map((g) => (
-            <span key={g} className="tag">{`#${g}`}</span>
-          ))}
+        <div className="tl-meta">
+          <span className="tl-project">
+            <i aria-hidden="true" style={{ background: project.color }} />
+            {project.name}
+          </span>
+          {subs > 0 && <ProgressRing done={subsDone} total={subs} />}
+          {t.tags.length > 0 && (
+            <span className="tl-tags">{t.tags.map((g) => `#${g}`).join(' ')}</span>
+          )}
         </div>
-      </div>
-      <div className="row-side">
+      </td>
+      <td className="tl-who">
         <Avatar id={t.assignee} />
-        <PriorityBadge task={t} />
-        {t.due ? <DueBadge task={t} /> : <span className="muted">No date</span>}
+      </td>
+      <td className="tl-prio">
+        <PriorityChip priority={t.priority} />
+      </td>
+      <td className="tl-status">
         <StatusSelect task={t} label={`Status of "${t.title}"`} />
-      </div>
-    </li>
+      </td>
+      <td className={`tl-due ${due?.tone ?? ''}`}>
+        {due ? (
+          <span className="tl-due-in">
+            <CalendarDays aria-hidden="true" size={13} className="tl-due-icon" />
+            {due.label}
+          </span>
+        ) : (
+          <span className="tl-none">No date</span>
+        )}
+      </td>
+    </tr>
   );
 }
 
@@ -108,6 +140,8 @@ export function ListView() {
   const { doc } = view;
   const tasks = filteredTasks(doc, view).sort(SORTS[sort] || SORTS.due);
   const allSel = tasks.length > 0 && tasks.every((t) => selected.has(t.id));
+  const someSel = !allSel && tasks.some((t) => selected.has(t.id));
+  const done = tasks.filter((t) => t.status === 'done').length;
 
   const selectAll = (on: boolean) => {
     const next = new Set(selected);
@@ -122,28 +156,55 @@ export function ListView() {
       {!tasks.length ? (
         <EmptyState filtered={doc.tasks.length > 0} />
       ) : (
-        <div className="card task-table">
-          <div className="row head">
-            <label className="sel">
-              <input
-                type="checkbox"
-                checked={allSel}
-                aria-label="Select all visible tasks"
-                onChange={(e) => selectAll(e.target.checked)}
-              />
-            </label>
-            <span>Task</span>
-            <span>Who</span>
-            <span>Priority</span>
-            <span>Due</span>
-            <span>Status</span>
+        <section className="tl-card" aria-labelledby="tlTitle">
+          <header className="tl-head">
+            <h2 id="tlTitle">
+              Task list <span className="tl-count">{tasks.length}</span>
+            </h2>
+            <div className="tl-progress" title={`${done} of ${tasks.length} done`}>
+              <span>{`${done} of ${tasks.length} done`}</span>
+              <span className="tl-bar" aria-hidden="true">
+                <span style={{ width: `${(done / tasks.length) * 100}%` }} />
+              </span>
+            </div>
+          </header>
+          <div className="tl-scroll">
+            <table className="tl-table">
+              <thead>
+                <tr>
+                  <th scope="col" className="tl-sel">
+                    <input
+                      type="checkbox"
+                      checked={allSel}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSel;
+                      }}
+                      aria-label="Select all visible tasks"
+                      onChange={(e) => selectAll(e.target.checked)}
+                    />
+                  </th>
+                  <th scope="col" className="tl-num">
+                    No
+                  </th>
+                  <th scope="col">Task</th>
+                  <th scope="col" className="tl-who">
+                    Who
+                  </th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="tl-due">
+                    Due date
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((t, i) => (
+                  <TaskRow key={t.id} t={t} n={i + 1} doc={doc} selected={selected.has(t.id)} />
+                ))}
+              </tbody>
+            </table>
           </div>
-          <ul>
-            {tasks.map((t) => (
-              <TaskRow key={t.id} t={t} doc={doc} selected={selected.has(t.id)} />
-            ))}
-          </ul>
-        </div>
+        </section>
       )}
     </>
   );
