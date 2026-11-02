@@ -1,9 +1,10 @@
-/** Page header (crumb, title, greeting, daily quote, calendar month controls) and the filter bar. */
-import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react';
-import { useEffect, type ReactNode } from 'react';
+/** The toolbar under the header (quick add, new project, project filter, month controls) and the filter bar. */
+import { ChevronLeft, ChevronRight, FolderPlus, Plus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { useApp, type SortKey } from '../../app/store';
-import { PRIORITIES, QUOTES } from '../../lib/config';
+import { quickAdd } from '../../app/actions';
+import { openDialog, setProject, useApp, type SortKey } from '../../app/store';
+import { PRIORITIES } from '../../lib/config';
+import { parseQuickAdd } from '../../lib/model/parser';
 import { projectTasks } from '../../lib/model/selectors';
 import { fmtMonth, fromISO, toISO, todayISO } from '../../lib/utils/dates';
 import { cap } from '../../lib/utils/text';
@@ -20,89 +21,103 @@ function moveCalendar(direction: 'prev' | 'next' | 'today') {
   useApp.setState({ calMonth, calExpanded: '' });
 }
 
-export function PageHead({ title, greeting }: { title: string; greeting?: boolean }) {
-  const projects = useApp((s) => s.doc.projects);
-  const projectId = useApp((s) => s.project);
+function MonthControls() {
   const calMonth = useApp((s) => s.calMonth);
-  const team = useApp((s) => s.team);
-  const me = useApp((s) => s.me);
-  const proj = projects.find((p) => p.id === projectId);
-  const isCalendar = title === 'Calendar';
-  const greet = greeting && !proj;
-
-  useEffect(() => {
-    document.title = `${title} · TaskFlow`;
-  }, [title]);
-
-  const now = new Date();
-  let heading: ReactNode = title;
-  let crumb = proj ? proj.name : 'All projects';
-  let actions: ReactNode = null;
-
-  if (greet) {
-    const first = (team.find((m) => m.id === me)?.name || '').split(' ')[0];
-    const hour = now.getHours();
-    const hello = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-    heading = (
-      <>
-        {first ? `${hello}, ${first}` : hello}
-        <span className={`greet-icon ${hour < 18 ? 'day' : 'night'}`}>
-          <Icon icon={hour < 18 ? Sun : Moon} size={26} />
-        </span>
-      </>
-    );
-    crumb = now.toLocaleDateString('en-IN', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-    const [line, follow] = QUOTES[Math.floor(now.getTime() / 86400000) % QUOTES.length];
-    actions = (
-      <aside className="quote" aria-label="Daily reminder">
-        <div>
-          <p className="quote-line">{`“${line}”`}</p>
-          <p className="muted">{follow}</p>
-        </div>
-      </aside>
-    );
-  } else if (isCalendar) {
-    actions = (
-      <>
-        <button
-          type="button"
-          className="icon-btn bordered"
-          aria-label="Previous month"
-          onClick={() => moveCalendar('prev')}
-        >
-          <Icon icon={ChevronLeft} />
-        </button>
-        <span className="cal-title" aria-live="polite">
-          {fmtMonth(calMonth)}
-        </span>
-        <button
-          type="button"
-          className="icon-btn bordered"
-          aria-label="Next month"
-          onClick={() => moveCalendar('next')}
-        >
-          <Icon icon={ChevronRight} />
-        </button>
-        <button type="button" className="btn" onClick={() => moveCalendar('today')}>
-          Today
-        </button>
-      </>
-    );
-  }
-
   return (
-    <div className="page-head">
-      <div>
-        <p className="crumb">{crumb}</p>
-        <h1>{heading}</h1>
-        {greet && <p className="page-sub">A clear view of what needs your attention.</p>}
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        className="icon-btn bordered"
+        aria-label="Previous month"
+        onClick={() => moveCalendar('prev')}
+      >
+        <Icon icon={ChevronLeft} />
+      </button>
+      <span className="cal-title" aria-live="polite">
+        {fmtMonth(calMonth)}
+      </span>
+      <button
+        type="button"
+        className="icon-btn bordered"
+        aria-label="Next month"
+        onClick={() => moveCalendar('next')}
+      >
+        <Icon icon={ChevronRight} />
+      </button>
+      <button type="button" className="btn" onClick={() => moveCalendar('today')}>
+        Today
+      </button>
+    </div>
+  );
+}
+
+interface ToolbarProps {
+  quick: string;
+  setQuick: (text: string) => void;
+  setQuickError: (msg: string) => void;
+  calendar: boolean;
+}
+
+export function Toolbar({ quick, setQuick, setQuickError, calendar }: ToolbarProps) {
+  const projects = useApp((s) => s.doc.projects);
+  const project = useApp((s) => s.project);
+  return (
+    <div className="toolbar">
+      <form
+        className="quick-add"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          const error = quickAdd(parseQuickAdd(quick));
+          setQuickError(error);
+          if (!error) setQuick('');
+        }}
+      >
+        <label className="sr-only" htmlFor="quickInput">
+          Quick add task
+        </label>
+        <Icon icon={Plus} size={16} />
+        <input
+          id="quickInput"
+          type="text"
+          autoComplete="off"
+          maxLength={200}
+          placeholder="Add a task… e.g. Review PR tomorrow @priya #dev !high"
+          aria-describedby="quickHint quickError"
+          value={quick}
+          onChange={(e) => {
+            setQuick(e.target.value);
+            setQuickError('');
+          }}
+        />
+        <button className="btn btn-primary sm" type="submit">
+          Add task
+        </button>
+      </form>
+      <button type="button" className="btn" onClick={() => openDialog('project')}>
+        <Icon icon={FolderPlus} size={16} />
+        <span className="max-sm:sr-only">Add project</span>
+      </button>
+
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        {calendar && <MonthControls />}
+        <label className="sr-only" htmlFor="projectFilter">
+          Project
+        </label>
+        <select
+          id="projectFilter"
+          className="field"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+        >
+          <option value="">All projects</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
       </div>
-      {actions && <div className="page-actions">{actions}</div>}
     </div>
   );
 }

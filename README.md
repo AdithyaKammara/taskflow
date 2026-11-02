@@ -126,4 +126,4 @@ GitHub Actions runs `check` and the end-to-end tests on every push and pull requ
 
 Built by [Adithya Kammara](https://github.com/AdithyaKammara) · [LinkedIn](https://linkedin.com/in/adithyakammara)
 
-Fonts: [Figtree](https://github.com/erikdkennedy/figtree) and [Bricolage Grotesque](https://github.com/ateliertriay/bricolage), under the SIL Open Font License (copies in `src/styles/fonts/`). Licensed under MIT.
+Font: [Figtree](https://github.com/erikdkennedy/figtree), under the SIL Open Font License (copy in `src/styles/fonts/`). Licensed under MIT.

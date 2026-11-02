@@ -1,0 +1,643 @@
+/* Dashboard: stat cards, completed-tasks trend, task calendar, Start here table, breakdown panels. */
+
+.db {
+  display: grid;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.db-card {
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.db-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.db-card-head h2 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.db-card-head p {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+/* ---- stat cards ---- */
+
+.db-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.db-stat-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.db-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+}
+
+.db-stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.db-stat-value strong {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-stat-value span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.db-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  padding: 1px 8px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.db-delta.up {
+  border-color: color-mix(in srgb, var(--st-done) 45%, transparent);
+  background: var(--st-done-bg);
+  color: var(--st-done-fg);
+}
+
+.db-delta.down {
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  background: var(--p-high-bg);
+  color: var(--p-high);
+}
+
+.db-delta.flat {
+  border-color: var(--border-strong);
+  color: var(--text-2);
+}
+
+.db-stat-sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.db-stat.alert .db-stat-value strong {
+  color: var(--danger);
+}
+
+/* ---- main grid: chart and table on the left, calendar on the right ---- */
+
+.db-main {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.db-main-left {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ---- trend chart ---- */
+
+.db-chart {
+  position: relative;
+}
+
+.db-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.db-chart .grid {
+  stroke: var(--border);
+}
+
+.db-chart .axis {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.db-chart .line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.db-chart .point {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.db-chart .point.on {
+  fill: var(--accent);
+}
+
+.db-chart .guide {
+  stroke: var(--accent);
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+
+.db-tip {
+  position: absolute;
+  z-index: 2;
+  min-width: 128px;
+  padding: 8px 10px;
+  transform: translate(-50%, calc(-100% - 12px));
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  pointer-events: none;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.db-tip strong {
+  margin-right: 4px;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.db-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.db-legend i {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+/* ---- Start here table ---- */
+
+.db-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.db-table th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.db-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.db-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.db-table tbody tr:hover {
+  background: var(--hover);
+}
+
+.db-table .num {
+  width: 36px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.db-table .title-btn {
+  font-weight: 600;
+  text-align: left;
+}
+
+.db-why {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.db-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.db-person .avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 0.62rem;
+}
+
+.db-due {
+  white-space: nowrap;
+}
+
+.db-due.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.db-due.today {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+/* status pill, coloured by the st-* classes */
+.db-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---- task calendar ---- */
+
+.db-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.db-day {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px 0 10px;
+  border: 0;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.db-day b {
+  color: var(--text-2);
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-day:hover {
+  background: var(--hover);
+}
+
+.db-day[aria-pressed='true'] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.db-day[aria-pressed='true'] b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.db-day[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* a dot under days that have tasks due */
+.db-day.has::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.db-tasks {
+  display: grid;
+  gap: 10px;
+}
+
+.db-tcard {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-align: left;
+  transition: border-color var(--t-fast) var(--ease);
+}
+
+.db-tcard:hover {
+  border-color: var(--border-strong);
+}
+
+.db-tcard-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.db-tcard.done .db-tcard-title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.db-tcard-desc {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-tcard-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: 0.78rem;
+}
+
+.db-tcard-meta .icon {
+  color: var(--muted);
+}
+
+.db-tcard-meta .avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 0.55rem;
+}
+
+.db-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.db-counts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-sub-head {
+  margin: 18px 0 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.db-upcoming li {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.db-upcoming .title-btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.db-upcoming .avatar {
+  width: 22px;
+  height: 22px;
+  font-size: 0.55rem;
+}
+
+.db-empty {
+  padding: 18px 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+/* ---- breakdown, workload, project progress ---- */
+
+.db-row3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.db-row3.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.db-donut {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.db-donut svg {
+  flex: none;
+  width: 124px;
+  height: 124px;
+}
+
+.db-donut .track {
+  fill: none;
+  stroke: var(--surface-3);
+  stroke-width: 12;
+}
+
+.db-donut .seg {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 12;
+}
+
+.db-donut .total {
+  fill: var(--text);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.db-donut .unit {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
+.db-list {
+  display: grid;
+  flex: 1;
+  gap: 10px;
+  min-width: 0;
+  font-size: 0.86rem;
+}
+
+.db-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.db-list .dot {
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.db-list .muted {
+  font-size: 0.8rem;
+}
+
+.db-bars {
+  display: grid;
+  gap: 12px;
+  font-size: 0.86rem;
+}
+
+.db-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.db-bars .db-person .avatar {
+  width: 22px;
+  height: 22px;
+}
+
+.db-bars .bar {
+  grid-column: 1 / -1;
+}
+
+.db-bars button {
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+.db-bars button:hover {
+  color: var(--accent-text);
+}
+
+.db-bars strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- breakpoints ---- */
+
+@media (max-width: 1200px) {
+  .db-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .db-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .db-row3,
+  .db-row3.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .db-row3,
+  .db-row3.two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .db-table .hide-sm {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .db-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .db-donut {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .db-donut svg {
+    align-self: center;
+  }
+}

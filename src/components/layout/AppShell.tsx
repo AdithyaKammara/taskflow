@@ -14,6 +14,7 @@ import { writePref } from '../../lib/store/storage';
 import { Toast } from '../Toast';
 import { QuickHint } from './QuickHint';
 import { Sidebar } from './Sidebar';
+import { Toolbar } from './Toolbar';
 import { TopBar } from './TopBar';
 
 const setNavOpen = (navOpen: boolean) => useApp.setState({ navOpen });
@@ -72,19 +73,18 @@ export function AppShell() {
           />
         )}
         <div className="flex min-w-0 flex-col" inert={navOpen}>
-          <TopBar
-            navOpen={navOpen}
-            onMenu={() => setNavOpen(true)}
-            menuRef={menuRef}
-            quick={quick}
-            setQuick={setQuick}
-            setQuickError={setQuickError}
-          />
+          <TopBar navOpen={navOpen} onMenu={() => setNavOpen(true)} menuRef={menuRef} />
           <main
             id="main"
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1180px] px-4 pt-7 pb-[max(48px,calc(24px+env(safe-area-inset-bottom)))] tablet:px-7 min-[1600px]:max-w-[1440px]"
+            className="mx-auto w-full max-w-[1320px] px-4 pt-5 pb-[max(48px,calc(24px+env(safe-area-inset-bottom)))] tablet:px-7"
           >
+            <Toolbar
+              quick={quick}
+              setQuick={setQuick}
+              setQuickError={setQuickError}
+              calendar={pathname === '/calendar'}
+            />
             <QuickHint text={quick} error={quickError} />
             <Outlet />
             <footer className="footer">
