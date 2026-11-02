@@ -1,0 +1,435 @@
+/*
+ * Kanban board (features/board). Soft columns, white cards with a chip row, a hairline and a
+ * footer; a lifted, tilted card while dragging; a dashed gap where it will land.
+ * Rounded shapes use continuous (squircle) corners where the browser has them.
+ */
+
+.kb-board {
+  --kb-col-bg: color-mix(in srgb, var(--text) 4%, transparent);
+  --kb-hair: color-mix(in srgb, var(--text) 8%, transparent);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(272px, 1fr));
+  gap: 12px;
+  align-items: start;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none; /* the rail below the board replaces it */
+  scroll-snap-type: x proximity;
+}
+.kb-board::-webkit-scrollbar {
+  display: none;
+}
+.kb-board.is-dragging {
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+/* ---- columns ---- */
+
+.kb-col {
+  padding: 12px;
+  border-radius: 16px;
+  corner-shape: squircle;
+  background: var(--kb-col-bg);
+  scroll-snap-align: start;
+  transition: background-color 200ms var(--ease);
+}
+.kb-col.is-target {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.kb-col-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.kb-col-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c);
+}
+.kb-count {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  color: var(--text-2);
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: kb-count 260ms var(--ease);
+}
+@keyframes kb-count {
+  from {
+    opacity: 0;
+    translate: 0 -5px;
+  }
+}
+
+.kb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 48px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kb-empty {
+  display: grid;
+  place-items: center;
+  min-height: 72px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  corner-shape: squircle;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* where the carried card will land */
+.kb-gap {
+  border: 1.5px dashed color-mix(in srgb, var(--text) 22%, transparent);
+  border-radius: 12px;
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  transform-origin: top;
+  animation: kb-gap 300ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+@keyframes kb-gap {
+  from {
+    opacity: 0;
+    scale: 1 0.7;
+  }
+}
+
+/* ---- cards ---- */
+
+.kb-card {
+  padding: 12px;
+  border: 1px solid var(--kb-hair, var(--border));
+  border-radius: 12px;
+  corner-shape: squircle;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  color: var(--text);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    translate 160ms var(--ease),
+    box-shadow 160ms var(--ease),
+    border-color 160ms var(--ease);
+}
+.kb-card:hover {
+  translate: 0 -1px;
+  box-shadow: var(--shadow-lift);
+}
+.kb-card:active {
+  cursor: grabbing;
+}
+.kb-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.kb-card.is-grabbed {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow-lift);
+  cursor: grabbing;
+}
+
+/* the card riding the pointer */
+.kb-float {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.kb-card.is-floating {
+  --kb-hair: color-mix(in srgb, var(--text) 8%, transparent);
+  transform-origin: 30% 20%;
+  box-shadow:
+    0 18px 36px -12px rgb(0 0 0 / 0.3),
+    0 2px 6px rgb(0 0 0 / 0.06);
+  cursor: grabbing;
+}
+
+.kb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.kb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 7px;
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text-2);
+  font-size: 0.69rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+.kb-chip svg {
+  flex: none;
+}
+.kb-chip.prio-high {
+  background: var(--p-high-bg);
+  color: var(--p-high);
+  font-weight: 600;
+}
+.kb-chip.prio-medium {
+  background: var(--p-medium-bg);
+  color: var(--p-medium);
+  font-weight: 600;
+}
+.kb-chip.prio-low {
+  font-weight: 600;
+}
+.kb-chip-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.kb-title {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  overflow-wrap: anywhere;
+}
+.kb-card.is-done .kb-title {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
+}
+.kb-note {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.kb-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kb-hair, var(--border));
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+.kb-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.kb-due.soon {
+  color: var(--warn);
+  font-weight: 600;
+}
+.kb-due.late {
+  color: var(--danger);
+  font-weight: 600;
+}
+.kb-foot-end {
+  margin-left: auto;
+}
+
+.kb-ring {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.kb-ring svg {
+  width: 14px;
+  height: 14px;
+  rotate: -90deg;
+}
+.kb-ring circle {
+  fill: none;
+  stroke-width: 2.2;
+}
+.kb-ring .track {
+  stroke: color-mix(in srgb, var(--text) 12%, transparent);
+}
+.kb-ring .fill {
+  stroke: var(--text);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 400ms var(--ease);
+}
+.kb-ring .fill.complete {
+  stroke: var(--st-done);
+}
+
+/* avatar with a callout above it on hover */
+.kb-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #52525b;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+.kb-avatar.none {
+  border: 1.5px dashed var(--border-strong);
+}
+.kb-avatar::before,
+.kb-avatar::after {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease-out,
+    translate 150ms ease-out;
+}
+.kb-avatar::after {
+  content: attr(data-tip);
+  translate: -50% 4px;
+  margin-bottom: 8px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  corner-shape: squircle;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.3);
+}
+.kb-avatar::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-bottom: 5px;
+  border-radius: 1.5px;
+  background: var(--text);
+  translate: -50% 4px;
+  rotate: 45deg;
+}
+.kb-card:hover .kb-avatar::before,
+.kb-card:hover .kb-avatar::after {
+  opacity: 1;
+}
+.kb-card:hover .kb-avatar::after {
+  translate: -50% 0;
+}
+.kb-card:hover .kb-avatar::before {
+  translate: -50% 0;
+}
+.kb-board.is-dragging .kb-avatar::before,
+.kb-board.is-dragging .kb-avatar::after {
+  display: none;
+}
+
+/* ---- add a task to a column ---- */
+
+.kb-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  corner-shape: squircle;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition:
+    background-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.kb-add:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+}
+.kb-add-form {
+  margin-top: 8px;
+}
+.kb-add-form .field {
+  width: 100%;
+}
+.kb-add-error {
+  margin: 6px 2px 0;
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+/* ---- scroll rail ---- */
+
+.kb-rail {
+  height: 6px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  cursor: pointer;
+  touch-action: none;
+}
+.kb-rail > div {
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  transition: background-color var(--t-fast) var(--ease);
+}
+.kb-rail:hover > div {
+  background: color-mix(in srgb, var(--text) 32%, transparent);
+}
+.kb-rail.held > div {
+  background: color-mix(in srgb, var(--text) 42%, transparent);
+}
+
+@media (max-width: 760px) {
+  .kb-board {
+    grid-template-columns: repeat(4, minmax(80vw, 1fr));
+  }
+}
+
+@media (pointer: coarse) {
+  .kb-card {
+    cursor: default;
+  }
+  .kb-card:hover {
+    translate: none;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+  .kb-rail {
+    display: none; /* fingers swipe the board itself */
+  }
+}

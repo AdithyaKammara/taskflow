@@ -19,9 +19,10 @@ import { TopBar } from './TopBar';
 
 const setNavOpen = (navOpen: boolean) => useApp.setState({ navOpen });
 
-/** The app frame: sidebar (a drawer below 900px), top bar, the current page and the overlays. */
+/** The app frame: sidebar (an icon rail or pinned open; a drawer below 900px), top bar, the current page and the overlays. */
 export function AppShell() {
   const navOpen = useApp((s) => s.navOpen);
+  const navPinned = useApp((s) => s.navPinned);
   const me = useApp((s) => s.me);
   const [quick, setQuick] = useState('');
   const [quickError, setQuickError] = useState('');
@@ -61,7 +62,13 @@ export function AppShell() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="grid min-h-dvh tablet:grid-cols-[var(--sidebar-w)_minmax(0,1fr)]">
+      <div
+        className={`grid min-h-dvh tablet:transition-[grid-template-columns] tablet:duration-200 tablet:ease-out ${
+          navPinned
+            ? 'tablet:grid-cols-[var(--sidebar-w)_minmax(0,1fr)]'
+            : 'tablet:grid-cols-[var(--rail-w)_minmax(0,1fr)]'
+        }`}
+      >
         <Sidebar open={navOpen} onNavigate={() => setNavOpen(false)} />
         {navOpen && (
           <button

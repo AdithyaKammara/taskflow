@@ -45,6 +45,8 @@ export interface AppState extends Filters {
   drawerId: string | null;
   dialog: DialogName | null;
   navOpen: boolean;
+  /** Wide screens: the sidebar stays open instead of folding to an icon rail that opens on hover. */
+  navPinned: boolean;
 
   toast: Toast | null;
   pomo: { seconds: number; running: boolean };
@@ -93,6 +95,7 @@ export const useApp = create<AppState>(() => ({
   drawerId: null,
   dialog: null,
   navOpen: false,
+  navPinned: readPref(KEYS.sidebar) === 'pinned',
 
   toast: null,
   pomo: { seconds: FOCUS_SECONDS, running: false },
@@ -239,6 +242,12 @@ export function toggleSelected(id: string, on: boolean) {
   if (on) selected.add(id);
   else selected.delete(id);
   set({ selected });
+}
+
+export function toggleNavPinned() {
+  const navPinned = !get().navPinned;
+  set({ navPinned });
+  writePref(KEYS.sidebar, navPinned ? 'pinned' : 'rail');
 }
 
 export const openDialog = (dialog: DialogName) => set({ dialog, navOpen: false });

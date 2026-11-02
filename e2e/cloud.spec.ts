@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
 
 test('an invite link shows the sign-in screen and remembers the invite', async ({ page }) => {
   await page.goto('./?invite=0123456789abcdef0123456789abcdef');
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.getByText('Sign in or create an account to join your team.')).toBeVisible();
   await expect(page).toHaveURL(/\/taskflow\/$/); // token removed from the address bar
   expect(await page.evaluate(() => localStorage.getItem('todo-app:invite'))).toBe(
@@ -26,14 +26,23 @@ test('the forms check their fields before sending anything', async ({ page }) =>
   await page.getByRole('button', { name: 'Create an account' }).click();
   await page.getByLabel('Your name').fill('Test');
   await page.getByLabel('Email').fill('test@example.com');
-  await page.getByLabel('Password').fill('short');
+  await page.getByLabel('Password', { exact: true }).fill('short');
+  await page.getByRole('button', { name: 'Show password' }).click();
+  await expect(page.getByLabel('Password', { exact: true })).toHaveAttribute('type', 'text');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page.getByRole('alert')).toHaveText('Use at least 8 characters.');
+
+  // the tabs switch between the two forms, with the arrow keys too
+  await page.getByRole('tab', { name: 'Sign in' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Sign in' }).press('ArrowRight');
+  await expect(page.getByRole('tab', { name: 'Sign up' })).toBeFocused();
+  await expect(page.getByRole('tab', { name: 'Sign up' })).toHaveAttribute('aria-selected', 'true');
 });
 
 test('the sign-in screen passes an accessibility scan', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
