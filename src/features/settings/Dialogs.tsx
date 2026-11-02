@@ -235,7 +235,7 @@ function ProjectDialog() {
           addProject(name, color);
         }}
       >
-        <label className="prop block">
+        <label className="prop prop-block">
           <span className="prop-label">Project name</span>
           <input
             className="field"
@@ -250,7 +250,7 @@ function ProjectDialog() {
         <p className="form-error" role="alert">
           {error}
         </p>
-        <div className="prop block">
+        <div className="prop prop-block">
           <span className="prop-label">Colour</span>
           <div className="swatches">
             {PROJECT_COLORS.map((c, i) => (

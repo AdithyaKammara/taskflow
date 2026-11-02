@@ -1136,7 +1136,7 @@ dialog::backdrop {
   padding: 3px 0;
 }
 
-.prop.block {
+.prop.prop-block {
   grid-template-columns: 1fr;
   gap: 4px;
 }

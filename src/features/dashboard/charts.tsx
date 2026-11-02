@@ -85,7 +85,7 @@ export function TrendChart({ days, counts }: { days: string[]; counts: number[] 
         </defs>
         {ticks.map((v) => (
           <g key={v}>
-            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grid" />
+            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="gridline" />
             <text x={L - 10} y={y(v) + 4} textAnchor="end" className="axis">
               {v}
             </text>

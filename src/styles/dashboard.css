@@ -148,7 +148,7 @@
   overflow: visible;
 }
 
-.db-chart .grid {
+.db-chart .gridline {
   stroke: var(--border);
 }
 

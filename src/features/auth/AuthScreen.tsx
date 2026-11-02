@@ -52,7 +52,7 @@ function Field({
   'aria-describedby'?: string;
 }) {
   return (
-    <label className="prop block">
+    <label className="prop prop-block">
       <span className="prop-label">{label}</span>
       <input
         id={ID[name]}

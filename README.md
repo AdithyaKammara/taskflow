@@ -28,7 +28,7 @@ A team task manager with accounts, shared workspaces and live sync, built with R
 
 **Planning**
 
-- **Dashboard:** a "Start here" list of the three tasks to look at first, key numbers, a status donut, a 7/14/30-day completion chart, workload, project progress and upcoming work. All charts are hand-built SVG.
+- **Dashboard:** four key numbers (open, overdue, due in 7 days, completed this week), a completed-tasks trend for 7/14/30 days with details on hover, "Start here" (the three tasks to look at first and why), a week calendar of due tasks with what is coming up next, and status, workload and project-progress breakdowns. All charts are hand-built SVG.
 - **Views:** a sortable, filterable list, a drag-and-drop board and a month calendar.
 - **Quick add:** type `Review PR tomorrow @priya #dev !high` and the date, assignee, tag and priority are filled in.
 - **Task drawer:** status, priority, assignee, due date, tags, description, subtasks, comments and an activity log.
@@ -42,7 +42,7 @@ A team task manager with accounts, shared workspaces and live sync, built with R
 
 - JSON backup and restore, and CSV export guarded against spreadsheet formula injection.
 - Keyboard accessible with visible focus, reduced-motion support, light and dark themes, a compact density option and layouts down to phone width. Every page and the main dialogs pass an automated WCAG 2.1 AA scan (axe) in both themes.
-- Glass surfaces on the sidebar, top bar and dialogs, which turn solid when the browser cannot blur or the viewer asks for reduced transparency. Task rows, cards and forms stay solid for readability.
+- A calm, flat interface: a light canvas with white cards, a sidebar with grouped navigation, one blue accent, and Figtree throughout. Dialogs are lightly frosted and turn solid when the browser cannot blur or the viewer asks for reduced transparency.
 
 ## How it works
 
@@ -86,12 +86,12 @@ index.html
 src/
   main.tsx, App.tsx  entry point and routes
   app/               store (Zustand), actions, routes
-  components/        app frame (sidebar, top bar, page header), shared pieces, toast
+  components/        app frame (sidebar, header, toolbar with quick add), shared pieces, toast
   features/          dashboard, tasks (list, drawer), board, calendar, palette and shortcuts,
                      settings dialogs, auth (sign-in, workspaces, team)
   lib/               logic with no React in it: config, types, model (sanitise, parser,
                      selectors, diff), store (history, storage), supabase (client, sync), utils
-  styles/            design tokens, Tailwind setup, view styles, self-hosted fonts
+  styles/            design tokens, Tailwind setup, view and dashboard styles, self-hosted font
 supabase/            schema.sql: tables, Row Level Security, triggers, invite function
 tests/               unit tests (Vitest)
 e2e/                 end-to-end and accessibility tests (Playwright, axe)
