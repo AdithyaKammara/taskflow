@@ -41,6 +41,8 @@ test('the forms check their fields before sending anything', async ({ page }) =>
 });
 
 test('the sign-in screen passes an accessibility scan', async ({ page }) => {
+  // scan the settled card, not its fade-in (see a11y.spec.ts)
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   const { violations } = await new AxeBuilder({ page })
