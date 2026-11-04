@@ -33,7 +33,7 @@ export function AppShell() {
 
   // like v6's go(): "My tasks" is the list filtered to me; any page change clears the selection
   useEffect(() => {
-    useApp.setState({ assignee: pathname === '/my-tasks' ? me : '', selected: new Set() });
+    useApp.setState({ assignees: pathname === '/my-tasks' ? [me] : [], selected: new Set() });
     window.scrollTo(0, 0);
   }, [pathname, me]);
 

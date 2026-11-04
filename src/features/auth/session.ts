@@ -67,6 +67,9 @@ const get = useSession.getState;
 
 let recovering = false;
 
+/** An error Supabase put in the address after an email link failed, shown once on sign-in. */
+let linkError = '';
+
 /** A stable colour per member, so avatars match across devices. */
 export const colorFor = (id: string) => {
   let h = 0;
@@ -133,7 +136,9 @@ async function handleAuth(event: AuthChangeEvent, session: Session | null) {
   const { user } = get();
   if (!session) {
     if (user) await leaveApp();
-    return showAuth('signin');
+    const message = linkError;
+    linkError = '';
+    return showAuth('signin', '', message);
   }
   if (user && session.user.id === user.id) return; // token refresh
   await enter(session.user);
@@ -299,10 +304,26 @@ function captureInvite() {
   history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash);
 }
 
+/**
+ * A confirmation or reset link that failed (expired, already used) comes back as
+ * #error=…&error_code=…&error_description=…. Keep a readable message and tidy the address.
+ */
+function captureLinkError() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  if (!params.get('error') && !params.get('error_code')) return;
+  linkError =
+    params.get('error_code') === 'otp_expired'
+      ? 'That email link has expired or was already used. Sign in, or use "Forgot password?" to get a new link.'
+      : params.get('error_description') ||
+        'That email link did not work. Please request a new one.';
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
 /** Cloud mode: watch the session and show sign-in or the workspace. Local mode: nothing to do. */
 export async function initSession() {
   if (!cloudEnabled()) return;
   captureInvite();
+  captureLinkError();
   try {
     await onAuthChange(handleAuth);
   } catch {

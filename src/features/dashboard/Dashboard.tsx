@@ -21,7 +21,7 @@ import { Link } from 'react-router';
 import { openDrawer, setProject, useApp } from '../../app/store';
 import { useView } from '../../app/useView';
 import { STATUSES } from '../../lib/config';
-import { member, statusLabel } from '../../lib/model/meta';
+import { member } from '../../lib/model/meta';
 import {
   SORTS,
   completionTrend,
@@ -29,10 +29,11 @@ import {
   projectTasks,
   rankNext,
 } from '../../lib/model/selectors';
-import type { Doc, Task } from '../../lib/types';
+import type { Doc, StatusId, Task } from '../../lib/types';
 import { addDays, diffDays, fmtDate, fromISO, todayISO } from '../../lib/utils/dates';
 import { cap } from '../../lib/utils/text';
 import { Avatar, Bar, EmptyState, Icon } from '../../components/shared';
+import { StatusBadge } from '../tasks/StatusSelect';
 import { DonutChart, TrendChart } from './charts';
 
 type Stats = ReturnType<typeof dashboardStats>;
@@ -88,9 +89,7 @@ function dueInfo(t: Task) {
   return { text: fmtDate(t.due), cls: '' };
 }
 
-const StatusPill = ({ t }: { t: Task }) => (
-  <span className={`db-status st-${t.status}`}>{statusLabel(t.status)}</span>
-);
+const StatusPill = ({ t }: { t: Task }) => <StatusBadge status={t.status} />;
 
 const ViewAll = ({ to, label }: { to: string; label: string }) => (
   <Link className="link" to={to}>
@@ -393,18 +392,25 @@ function TaskCalendar({ tasks }: { tasks: Task[] }) {
 /* ---------- breakdowns ---------- */
 
 function StatusCard({ s, total }: { s: Stats; total: number }) {
+  const [active, setActive] = useState<StatusId | null>(null);
   return (
     <Card title="Status breakdown" sub="All tasks in view, by status">
       <div className="db-donut">
-        <DonutChart counts={s.counts} total={total} />
-        <ul className="db-list">
+        <DonutChart counts={s.counts} total={total} active={active} onActive={setActive} />
+        <ul className="db-list" onMouseLeave={() => setActive(null)}>
           {STATUSES.map((st) => (
-            <li key={st.id} className={`st-${st.id}`}>
+            <li
+              key={st.id}
+              className={`st-${st.id}${active === st.id ? ' on' : ''}`}
+              onMouseEnter={() => setActive(s.counts[st.id] ? st.id : null)}
+            >
               <i className="dot" aria-hidden="true" />
               <span>{st.label}</span>
               <span>
                 <strong>{s.counts[st.id]}</strong>{' '}
-                <span className="muted">{Math.round((s.counts[st.id] / total) * 100)}%</span>
+                <span className="muted">
+                  {total ? Math.round((s.counts[st.id] / total) * 100) : 0}%
+                </span>
               </span>
             </li>
           ))}

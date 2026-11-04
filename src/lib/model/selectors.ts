@@ -3,14 +3,20 @@
  * They take everything they need as arguments, so they can be unit-tested without a browser.
  */
 import { ME, PRIORITY_WEIGHT, STATUS_IDS, TEAM } from '../config';
-import type { Doc, StatusId, Task } from '../types';
+import type { Doc, Priority, StatusId, Task } from '../types';
 import { DAY_MS, addDays, diffDays, todayISO, toISO } from '../utils/dates';
 
 /** The filter settings selectors read from the UI state. */
 export interface Filters {
   project: string;
-  assignee: string;
-  priority: string;
+  /** Each list means "any of these"; an empty list means no filter. */
+  statuses: StatusId[];
+  priorities: Priority[];
+  /** Member ids; '' stands for unassigned. */
+  assignees: string[];
+  /** Due-date range, local `YYYY-MM-DD` or '' for open-ended. Tasks with no due date are left out. */
+  dueFrom: string;
+  dueTo: string;
   search: string;
   /** 'all' | 'today' | 'overdue' | 'unassigned' | '#tag' */
   quickChip: string;
@@ -24,14 +30,26 @@ export const projectOf = (state: Doc, t: Task) =>
 export const projectTasks = (state: Doc, ui: Pick<Filters, 'project'>) =>
   state.tasks.filter((t) => !ui.project || t.project === ui.project);
 
-/** Applies the assignee / priority / quick-chip / search filters to the current project's tasks. */
+/** How many filter-panel groups are in use (status, priority, assignee, due date). */
+export const panelFilterCount = (ui: Filters) =>
+  [ui.statuses.length, ui.priorities.length, ui.assignees.length, ui.dueFrom || ui.dueTo].filter(
+    Boolean
+  ).length;
+
+/** Applies the filter panel, quick chip and search to the current project's tasks. */
 export function filteredTasks(state: Doc, ui: Filters, now = new Date()) {
   const q = ui.search.trim().toLowerCase();
   const chip = ui.quickChip;
   const today = todayISO(now);
   return projectTasks(state, ui).filter((t) => {
-    if (ui.assignee && t.assignee !== ui.assignee) return false;
-    if (ui.priority && t.priority !== ui.priority) return false;
+    if (ui.statuses.length && !ui.statuses.includes(t.status)) return false;
+    if (ui.priorities.length && !ui.priorities.includes(t.priority)) return false;
+    if (ui.assignees.length && !ui.assignees.includes(t.assignee)) return false;
+    if (ui.dueFrom || ui.dueTo) {
+      if (!t.due || (ui.dueFrom && t.due < ui.dueFrom) || (ui.dueTo && t.due > ui.dueTo)) {
+        return false;
+      }
+    }
     if (chip === 'today' && (t.status === 'done' || t.due !== today)) return false;
     if (chip === 'overdue' && (t.status === 'done' || !t.due || diffDays(t.due, now) >= 0)) {
       return false;

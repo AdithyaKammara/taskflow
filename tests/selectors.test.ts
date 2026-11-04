@@ -6,8 +6,10 @@ import {
   completionTrend,
   dashboardStats,
   filteredTasks,
+  panelFilterCount,
   rankNext,
   scoreTask,
+  type Filters,
 } from '../src/lib/model/selectors';
 
 const NOW = new Date(2026, 9, 26, 12, 0); // Mon 26 Oct 2026
@@ -45,10 +47,13 @@ const state = normalize({
   ],
 });
 
-const ui = (over = {}) => ({
+const ui = (over: Partial<Filters> = {}): Filters => ({
   project: '',
-  assignee: '',
-  priority: '',
+  statuses: [],
+  priorities: [],
+  assignees: [],
+  dueFrom: '',
+  dueTo: '',
   search: '',
   quickChip: 'all',
   ...over,
@@ -61,9 +66,29 @@ describe('filteredTasks', () => {
   });
 
   it('filters by assignee, priority and project', () => {
-    assert.deepEqual(ids(filteredTasks(state, ui({ assignee: 'priya' }), NOW)), ['b']);
-    assert.deepEqual(ids(filteredTasks(state, ui({ priority: 'high' }), NOW)), ['a', 'd']);
+    assert.deepEqual(ids(filteredTasks(state, ui({ assignees: ['priya'] }), NOW)), ['b']);
+    assert.deepEqual(ids(filteredTasks(state, ui({ priorities: ['high'] }), NOW)), ['a', 'd']);
     assert.equal(filteredTasks(state, ui({ project: 'p-none' }), NOW).length, 0);
+  });
+
+  it('treats each panel group as "any of" and combines groups with "and"', () => {
+    const f = (over: Partial<Filters>) => ids(filteredTasks(state, ui(over), NOW));
+    assert.deepEqual(f({ statuses: ['doing', 'done'] }), ['d', 'e']);
+    assert.deepEqual(f({ priorities: ['high', 'low'] }), ['a', 'c', 'd']);
+    assert.deepEqual(f({ assignees: ['me', ''] }), ['a', 'c', 'd', 'e']);
+    assert.deepEqual(f({ priorities: ['high'], statuses: ['todo'] }), ['a']);
+  });
+
+  it('filters by due-date range and leaves out undated tasks', () => {
+    const f = (over: Partial<Filters>) => ids(filteredTasks(state, ui(over), NOW));
+    assert.deepEqual(f({ dueFrom: iso(0) }), ['b', 'c']);
+    assert.deepEqual(f({ dueTo: iso(0) }), ['a', 'b']);
+    assert.deepEqual(f({ dueFrom: iso(-2), dueTo: iso(-1) }), ['a']);
+  });
+
+  it('counts the panel groups in use', () => {
+    assert.equal(panelFilterCount(ui()), 0);
+    assert.equal(panelFilterCount(ui({ statuses: ['done'], dueTo: iso(1), search: 'x' })), 2);
   });
 
   it('supports the quick chips', () => {

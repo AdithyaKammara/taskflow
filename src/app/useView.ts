@@ -8,14 +8,17 @@ import { useApp } from './store';
  */
 export const useView = () =>
   useApp(
-    useShallow(({ doc, team, me, project, assignee, priority, search, quickChip }) => ({
-      doc,
-      team,
-      me,
-      project,
-      assignee,
-      priority,
-      search,
-      quickChip,
+    useShallow((s) => ({
+      doc: s.doc,
+      team: s.team,
+      me: s.me,
+      project: s.project,
+      statuses: s.statuses,
+      priorities: s.priorities,
+      assignees: s.assignees,
+      dueFrom: s.dueFrom,
+      dueTo: s.dueTo,
+      search: s.search,
+      quickChip: s.quickChip,
     }))
   );
