@@ -4,44 +4,106 @@ import { STATUSES } from '../../lib/config';
 import type { StatusId } from '../../lib/types';
 import { fmtDate, fromISO } from '../../lib/utils/dates';
 
-/** Ring of task counts per status. */
-export function DonutChart({ counts, total }: { counts: Record<StatusId, number>; total: number }) {
-  const R = 46;
-  const C = 2 * Math.PI * R;
-  // each segment starts where the previous ones end
-  const segs = STATUSES.filter((s) => counts[s.id]).map((s) => ({
-    id: s.id,
-    len: (counts[s.id] / total) * C,
-  }));
-  const starts = segs.map((_, i) => segs.slice(0, i).reduce((a, x) => a + x.len, 0));
+/** Polar point on the donut, angle in radians from 12 o'clock, clockwise. */
+const polar = (r: number, a: number): [number, number] => [
+  60 + r * Math.sin(a),
+  60 - r * Math.cos(a),
+];
+
+/**
+ * One rounded ring segment from angle a0 to a1. The shape is drawn inset by half the corner
+ * stroke, then stroked in its own colour with round joins, which rounds the corners.
+ */
+function segmentPath(a0: number, a1: number, ro: number, ri: number) {
+  const [x0, y0] = polar(ro, a0);
+  const [x1, y1] = polar(ro, a1);
+  const [x2, y2] = polar(ri, a1);
+  const [x3, y3] = polar(ri, a0);
+  const large = a1 - a0 > Math.PI ? 1 : 0;
+  return `M${x0} ${y0}A${ro} ${ro} 0 ${large} 1 ${x1} ${y1}L${x2} ${y2}A${ri} ${ri} 0 ${large} 0 ${x3} ${y3}Z`;
+}
+
+const RING = { outer: 56, inner: 37, corner: 4, gap: 0.06 };
+
+/**
+ * Ring of task counts per status, with the completion rate in the middle. `active` / `onActive`
+ * link a segment to its legend row, so hovering either highlights both.
+ */
+export function DonutChart({
+  counts,
+  total,
+  active,
+  onActive,
+}: {
+  counts: Record<StatusId, number>;
+  total: number;
+  active: StatusId | null;
+  onActive: (id: StatusId | null) => void;
+}) {
+  const done = total ? Math.round((counts.done / total) * 100) : 0;
+  const present = STATUSES.filter((s) => counts[s.id]);
+  const half = RING.corner / 2;
+  const ro = RING.outer - half;
+  const ri = RING.inner + half;
+  const gap = present.length > 1 ? RING.gap : 0;
+  const sweeps = present.map((s) => (counts[s.id] / total) * 2 * Math.PI);
+  const segs = present.map((s, i) => {
+    const start = sweeps.slice(0, i).reduce((x, y) => x + y, 0);
+    const a0 = start + gap / 2 + half / ro;
+    const a1 = start + sweeps[i] - gap / 2 - half / ro;
+    return { ...s, a0, a1 };
+  });
+  const tip = segs.find((x) => x.id === active);
+  // the tooltip follows the pointer up and down but stays over the ring, clear of the legend
+  const [pointerY, setPointerY] = useState(0);
+
   return (
-    <svg
-      viewBox="0 0 120 120"
-      role="img"
-      aria-label={
-        'Status breakdown: ' + STATUSES.map((s) => `${counts[s.id]} ${s.label}`).join(', ')
-      }
+    <div
+      className="db-ring"
+      onMouseLeave={() => onActive(null)}
+      onMouseMove={(e) => setPointerY(e.clientY - e.currentTarget.getBoundingClientRect().top)}
     >
-      <circle cx={60} cy={60} r={R} className="track" />
-      {segs.map(({ id, len }, i) => (
-        <circle
-          key={id}
-          cx={60}
-          cy={60}
-          r={R}
-          className={`seg st-${id}`}
-          transform="rotate(-90 60 60)"
-          strokeDasharray={`${len} ${C - len}`}
-          strokeDashoffset={-starts[i]}
-        />
-      ))}
-      <text x={60} y={62} textAnchor="middle" className="total">
-        {total}
-      </text>
-      <text x={60} y={78} textAnchor="middle" className="unit">
-        {total === 1 ? 'task' : 'tasks'}
-      </text>
-    </svg>
+      <svg
+        viewBox="0 0 120 120"
+        role="img"
+        aria-label={`Status breakdown: ${done}% completed. ${STATUSES.map((s) => `${counts[s.id]} ${s.label}`).join(', ')}`}
+      >
+        {present.length === 0 && (
+          <circle cx={60} cy={60} r={(RING.outer + RING.inner) / 2} className="track" />
+        )}
+        {present.length === 1 ? (
+          <circle
+            cx={60}
+            cy={60}
+            r={(RING.outer + RING.inner) / 2}
+            className={`seg ring st-${present[0].id}`}
+            onMouseEnter={() => onActive(present[0].id)}
+          />
+        ) : (
+          segs.map((x) => (
+            <path
+              key={x.id}
+              d={segmentPath(x.a0, Math.max(x.a1, x.a0 + 0.001), ro, ri)}
+              className={`seg st-${x.id}${active === x.id ? ' on' : ''}${active && active !== x.id ? ' dim' : ''}`}
+              onMouseEnter={() => onActive(x.id)}
+            />
+          ))
+        )}
+        <text x={60} y={60} textAnchor="middle" dominantBaseline="middle" className="total">
+          {done}%
+        </text>
+        <text x={60} y={75} textAnchor="middle" className="unit">
+          Completed
+        </text>
+      </svg>
+      {tip && (
+        <div className="db-tip db-ring-tip" style={{ top: pointerY }}>
+          <span className={`swatch st-${tip.id}`} aria-hidden="true" />
+          <span>{tip.label}</span>
+          <strong>{counts[tip.id].toLocaleString()}</strong>
+        </div>
+      )}
+    </div>
   );
 }
 

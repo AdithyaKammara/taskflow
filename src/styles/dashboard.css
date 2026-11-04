@@ -304,19 +304,6 @@
 }
 
 /* status pill, coloured by the st-* classes */
-.db-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
-  border-radius: 999px;
-  background: var(--tag-bg);
-  color: var(--tag-fg);
-  font-size: 0.76rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 /* ---- task calendar ---- */
 
 .db-week {
@@ -410,7 +397,6 @@
 
 .db-tcard.done .db-tcard-title {
   color: var(--muted);
-  text-decoration: line-through;
 }
 
 .db-tcard-desc {
@@ -510,33 +496,89 @@
   gap: 20px;
 }
 
-.db-donut svg {
+.db-ring {
+  position: relative;
   flex: none;
-  width: 124px;
-  height: 124px;
+  width: 148px;
+  height: 148px;
 }
 
-.db-donut .track {
+.db-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.db-ring .track {
   fill: none;
   stroke: var(--surface-3);
-  stroke-width: 12;
+  stroke-width: 19;
 }
 
-.db-donut .seg {
-  fill: none;
+.db-ring .seg {
+  fill: var(--c);
   stroke: var(--c);
-  stroke-width: 12;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  transform-origin: 60px 60px;
+  transition:
+    opacity var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
 }
 
-.db-donut .total {
+.db-ring .seg.ring {
+  fill: none;
+  stroke-width: 19;
+}
+
+.db-ring .seg.on {
+  transform: scale(1.045);
+}
+
+.db-ring .seg.dim {
+  opacity: 0.35;
+}
+
+.db-ring .total {
   fill: var(--text);
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
-.db-donut .unit {
+.db-ring .unit {
   fill: var(--muted);
-  font-size: 10px;
+  font-size: 8.5px;
+  font-weight: 550;
+}
+
+.db-ring-tip {
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.db-ring-tip strong {
+  margin: 0 0 0 auto;
+  padding-left: 10px;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-ring-tip .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--c);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-ring .seg {
+    transition: none;
+  }
 }
 
 .db-list {
@@ -560,6 +602,17 @@
   margin: 0;
   border-radius: 50%;
   background: var(--c);
+}
+
+.db-list li {
+  margin: -3px -6px;
+  padding: 3px 6px;
+  border-radius: var(--r-xs);
+  transition: background-color var(--t-fast) var(--ease);
+}
+
+.db-list li.on {
+  background: color-mix(in srgb, var(--c) 10%, transparent);
 }
 
 .db-list .muted {
@@ -637,7 +690,7 @@
     flex-direction: column;
     align-items: stretch;
   }
-  .db-donut svg {
+  .db-ring {
     align-self: center;
   }
 }

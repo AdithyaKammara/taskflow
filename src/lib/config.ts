@@ -13,6 +13,7 @@ export const KEYS = {
   density: 'todo-app:density',
   view: 'todo-app:view',
   sidebar: 'todo-app:sidebar',
+  calView: 'todo-app:calview',
   workspace: 'todo-app:workspace',
   invite: 'todo-app:invite',
 };

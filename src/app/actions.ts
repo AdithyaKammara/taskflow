@@ -180,7 +180,9 @@ export function quickAdd(
 ) {
   if (!p.title) return 'Type a task title first. Dates, tags and @names alone are not a task.';
   if (p.title.length > MAX_TITLE) return `Keep the title under ${MAX_TITLE} characters.`;
-  const { doc, project, assignee } = useApp.getState();
+  const { doc, project, assignees } = useApp.getState();
+  // filtering to exactly one person (e.g. My tasks) makes them the default assignee
+  const assignee = assignees.length === 1 ? assignees[0] : '';
   const proj =
     doc.projects.find((x) => x.id === project) || doc.projects.find((x) => x.id === INBOX)!;
   addTask({ ...p, assignee: p.assignee || assignee, project: proj.id, status });
