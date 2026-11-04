@@ -15,13 +15,18 @@ The app stays a static site (GitHub Pages works); Supabase provides the database
    region near your team and save the database password somewhere safe.
 2. **Create the tables.** In the dashboard open **SQL Editor → New query**, paste the whole of
    [`supabase/schema.sql`](../supabase/schema.sql) and press **Run**. It is safe to run again later.
-3. **Allow your site's address.** Go to **Authentication → URL Configuration**:
-   - **Site URL**: `https://adithyakammara.github.io/taskflow/`
-   - **Redirect URLs**: add the same address, plus `http://localhost:5173/taskflow/` for local
-     development.
+3. **Allow your site's addresses.** Go to **Authentication → URL Configuration**:
+   - **Site URL**: the address you share with people, for example
+     `https://adithyakammara.github.io/taskflow/` or `https://taskflow-sable-beta.vercel.app/`.
+     Supabase falls back to it whenever a link's return address is missing or not allowed, so it
+     must be a page that exists.
+   - **Redirect URLs**: one entry for every address the app is served from:
+     `https://adithyakammara.github.io/taskflow/`, `https://taskflow-sable-beta.vercel.app/**` and
+     `http://localhost:5173/taskflow/` for local development.
 
    Confirmation, password-reset and invite links always point at the app's base address (never a
-   page inside it), so these two entries are all it needs.
+   page inside it), so one entry per site is all it needs. Avoid broad wildcards such as
+   `https://*.vercel.app`: anyone can create a site that matches them and receive your users' links.
 4. **Connect the app.** In **Project Settings → API** copy the **Project URL** and the
    **publishable** (anon) key into `.env`:
 
@@ -57,6 +62,17 @@ The app stays a static site (GitHub Pages works); Supabase provides the database
   changes arrive over a realtime channel. If two people edit the same task at the same moment, the
   last save wins. While offline the sidebar shows "Offline, retrying" and changes are re-sent
   automatically. Undo and redo still work and sync like any other change.
+
+## Troubleshooting
+
+- **Email links open a 404 page.** The Site URL points at an address that no longer exists (for
+  example an old repository name), or the app's address is missing from Redirect URLs. Fix both
+  under **Authentication → URL Configuration**. Links sent before the fix still point at the old
+  address; ask people to use **Forgot password?** or sign up again for a fresh email.
+- **"That email link has expired or was already used."** Confirmation and reset links work once and
+  expire. Request a new one with **Forgot password?**.
+- **`npm run dev` shows the sign-in screen.** That is cloud mode. Sign in (being signed in on the
+  live site does not carry over to `localhost`), or use local mode with an empty `.env.local`.
 
 ## Notes and limits
 
