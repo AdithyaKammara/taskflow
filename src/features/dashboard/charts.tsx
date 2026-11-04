@@ -66,7 +66,7 @@ export function DonutChart({
       <svg
         viewBox="0 0 120 120"
         role="img"
-        aria-label={`${done}% completed. ${STATUSES.map((s) => `${counts[s.id]} ${s.label}`).join(', ')}`}
+        aria-label={`Status breakdown: ${done}% completed. ${STATUSES.map((s) => `${counts[s.id]} ${s.label}`).join(', ')}`}
       >
         {present.length === 0 && (
           <circle cx={60} cy={60} r={(RING.outer + RING.inner) / 2} className="track" />
