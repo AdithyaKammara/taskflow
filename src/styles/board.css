@@ -221,8 +221,6 @@
 }
 .kb-card.is-done .kb-title {
   color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
 }
 .kb-note {
   display: -webkit-box;

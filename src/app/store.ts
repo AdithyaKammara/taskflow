@@ -15,11 +15,12 @@ import { createHistory } from '../lib/store/history';
 import { readPref, storage, writePref } from '../lib/store/storage';
 import { cloudEnabled } from '../lib/supabase/env';
 import type { Doc, Member } from '../lib/types';
-import { todayISO } from '../lib/utils/dates';
+import { addDays, fromISO, todayISO } from '../lib/utils/dates';
 
 export type Theme = 'light' | 'dark';
 export type Density = 'comfortable' | 'compact';
 export type SortKey = 'due' | 'priority' | 'newest' | 'title';
+export type CalView = 'month' | 'week' | 'list';
 export type DialogName = 'settings' | 'help' | 'next' | 'project' | 'palette' | 'team';
 export type SyncStatus = 'synced' | 'saving' | 'offline';
 
@@ -41,6 +42,10 @@ export interface AppState extends Filters {
   calMonth: string;
   /** The calendar day whose full task list is expanded, or ''. */
   calExpanded: string;
+  /** Which calendar layout is shown (remembered in this browser). */
+  calView: CalView;
+  /** The Sunday that starts the week the week view shows, `YYYY-MM-DD`. */
+  calWeek: string;
   trendDays: 7 | 14 | 30;
   drawerId: string | null;
   dialog: DialogName | null;
@@ -67,6 +72,14 @@ const root = document.documentElement;
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 /** The saved choice, or null when the user never picked one (then the OS decides). */
+const savedCalView = (): CalView => {
+  const v = readPref(KEYS.calView);
+  return v === 'week' || v === 'list' ? v : 'month';
+};
+
+/** The Sunday on or before `iso`. */
+export const weekStart = (iso: string) => addDays(iso, -fromISO(iso).getDay());
+
 const savedTheme = (): Theme | null => {
   const s = readPref(KEYS.theme);
   return s === 'light' || s === 'dark' ? s : null;
@@ -83,14 +96,19 @@ export const useApp = create<AppState>(() => ({
   canRedo: false,
 
   project: '',
-  assignee: '',
-  priority: '',
+  statuses: [],
+  priorities: [],
+  assignees: [],
+  dueFrom: '',
+  dueTo: '',
   search: '',
   quickChip: 'all',
   sort: 'due',
   selected: new Set(),
   calMonth: todayISO().slice(0, 8) + '01',
   calExpanded: '',
+  calView: savedCalView(),
+  calWeek: weekStart(todayISO()),
   trendDays: 14,
   drawerId: null,
   dialog: null,
@@ -231,7 +249,19 @@ export function setMembers(members: Member[], meId: string) {
 
 // ---------- view settings ----------
 
-export const clearFilters = () => set({ search: '', assignee: '', priority: '', quickChip: 'all' });
+/** Resets the filter panel only (search and quick pills stay). */
+export const clearPanelFilters = () =>
+  set({ statuses: [], priorities: [], assignees: [], dueFrom: '', dueTo: '' });
+
+export const clearFilters = () => {
+  clearPanelFilters();
+  set({ search: '', quickChip: 'all' });
+};
+
+export function setCalView(calView: CalView) {
+  writePref(KEYS.calView, calView);
+  set({ calView, calExpanded: '' });
+}
 
 export function setProject(project: string) {
   set({ project, selected: new Set(), navOpen: false });

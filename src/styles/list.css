@@ -162,8 +162,6 @@
 }
 .tl-row.is-done .tl-title {
   color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
 }
 .tl-meta {
   display: flex;
@@ -184,21 +182,6 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-}
-
-/* status: a pill in the status colours that is also the dropdown to change it */
-.tl-status .status-select {
-  min-height: 28px;
-  padding: 0 26px 0 22px;
-  border: 0;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle, var(--c) 3.5px, transparent 4px) 9px 50% / 8px 8px no-repeat,
-    var(--tag-bg);
-  color: var(--tag-fg);
-  font-size: 0.76rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .tl-due {
