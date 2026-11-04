@@ -255,7 +255,7 @@
     .search-pill {
       min-width: 0;
     }
-    .search-pill span,
+    .search-pill > span:not(.icon),
     .search-pill kbd {
       display: none;
     }

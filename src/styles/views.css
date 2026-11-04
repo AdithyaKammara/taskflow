@@ -1609,17 +1609,17 @@ dialog::backdrop {
   padding: 3px 0;
 }
 
-.prop.block {
+.prop.prop-block {
   grid-template-columns: 1fr;
   gap: 4px;
 }
 
-/* Tailwind's .block utility (display: block) wins over the grid above: stack label and field */
-.prop.block > .prop-label {
+/* stack the label above a full-width field */
+.prop.prop-block > .prop-label {
   display: block;
   margin-bottom: 4px;
 }
-.prop.block > .field {
+.prop.prop-block > .field {
   display: block;
   width: 100%;
 }

@@ -303,7 +303,7 @@ function DrawerBody({ t }: { t: Task }) {
             />
           </label>
         </div>
-        <label className="prop block">
+        <label className="prop prop-block">
           <span className="prop-label">Description</span>
           <textarea
             key={`desc:${t.description}`}
